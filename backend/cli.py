@@ -22,6 +22,7 @@ def _print_report_summary(report: dict) -> None:
     summary = report.get("summary", {})
     target = report.get("target", {})
     recommendation = report.get("recommendation", {})
+    readiness = report.get("readiness", {})
     print("\nData Profiler AI")
     print("----------------")
     print(f"Report ID: {report['id']}")
@@ -36,6 +37,9 @@ def _print_report_summary(report: dict) -> None:
     print(f"Likely target: {target.get('column') or 'not detected'}")
     print(f"Recommendation: {recommendation.get('recommended_approach', 'n/a')}")
     print(f"Confidence: {recommendation.get('confidence', 'n/a')}")
+    if readiness:
+        print(f"Data quality score: {readiness.get('data_quality_score', 'n/a')}")
+        print(f"Modeling readiness score: {readiness.get('modeling_readiness_score', 'n/a')}")
     print(f"Saved report: {report.get('report_path')}")
 
 
@@ -45,6 +49,7 @@ def main() -> int:
     parser.add_argument("--paths", nargs="+", help="Multiple local data files to analyze together.")
     parser.add_argument("--api-config", help="JSON config file for an external API source.")
     parser.add_argument("--sql-config", help="JSON config file for a SQL source.")
+    parser.add_argument("--objective", help="Optional business objective to guide deterministic recommendations.")
     args = parser.parse_args()
 
     selected = [bool(args.path), bool(args.paths), bool(args.api_config), bool(args.sql_config)]
@@ -53,19 +58,19 @@ def main() -> int:
 
     if args.path:
         loaded = load_file(args.path)
-        report = run_profile(loaded)
+        report = run_profile(loaded, business_objective=args.objective)
     elif args.paths:
         if len(args.paths) < 2:
             parser.error("--paths requires at least two files.")
-        report = run_multi_profile([load_file(path) for path in args.paths])
+        report = run_multi_profile([load_file(path) for path in args.paths], business_objective=args.objective)
     elif args.api_config:
         config = ApiSourceRequest(**_read_json_config(args.api_config))
         loaded = load_api(config)
-        report = run_profile(loaded)
+        report = run_profile(loaded, business_objective=args.objective or config.business_objective)
     else:
         config = SqlSourceRequest(**_read_json_config(args.sql_config))
         loaded = load_sql(config)
-        report = run_profile(loaded)
+        report = run_profile(loaded, business_objective=args.objective or config.business_objective)
     _print_report_summary(report)
     return 0
 

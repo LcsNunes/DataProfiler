@@ -32,8 +32,9 @@ def build_recommendation(
     quality: dict[str, Any],
     statistics: dict[str, Any],
     target: dict[str, Any],
+    context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    signals = derive_signals(source, summary, schema, quality, statistics, target)
+    signals = derive_signals(source, summary, schema, quality, statistics, target, context)
     catalog = load_catalog()
     matched = [rule for rule in catalog.get("rules", []) if _matches(rule, signals)]
     matched.sort(key=lambda item: item.get("priority", 0), reverse=True)
@@ -72,4 +73,3 @@ def build_recommendation(
         )
 
     return recommendation
-

@@ -5,6 +5,13 @@ from typing import Any
 
 from backend.app.core.security import sanitize_for_output
 from backend.app.loaders.base import DataLoadResult
+from backend.app.profiler.actionable_insights import (
+    analysis_context,
+    build_column_actions,
+    build_executive_summary,
+    build_readiness_scores,
+    build_smart_preview,
+)
 from backend.app.profiler.chart_builder import build_charts
 from backend.app.profiler.issue_catalog import explain_problem
 from backend.app.profiler.quality_checks import run_quality_checks
@@ -53,7 +60,8 @@ def _enrich_problems(problems: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return enriched
 
 
-def build_profile_payload(loaded: DataLoadResult) -> dict[str, Any]:
+def build_profile_payload(loaded: DataLoadResult, business_objective: str | None = None) -> dict[str, Any]:
+    context = analysis_context(business_objective)
     schema = analyze_schema(loaded.dataframe)
     quality = run_quality_checks(loaded.dataframe, schema)
     statistics = analyze_statistics(loaded.dataframe, schema)
@@ -67,6 +75,19 @@ def build_profile_payload(loaded: DataLoadResult) -> dict[str, Any]:
         quality=quality,
         statistics=statistics,
         target=target,
+        context=context,
+    )
+    readiness = build_readiness_scores(summary, schema, quality, target)
+    column_actions = build_column_actions(schema, quality, target)
+    smart_preview = build_smart_preview(loaded.dataframe, quality)
+    executive_summary = build_executive_summary(
+        summary=summary,
+        schema=schema,
+        quality=quality,
+        target=target,
+        recommendation=recommendation,
+        readiness=readiness,
+        context=context,
     )
 
     return {
@@ -74,6 +95,11 @@ def build_profile_payload(loaded: DataLoadResult) -> dict[str, Any]:
         "created_at": datetime.now(timezone.utc).isoformat(),
         "report_type": "single_dataset",
         "source": sanitize_for_output(loaded.source),
+        "analysis_context": context,
+        "executive_summary": executive_summary,
+        "readiness": readiness,
+        "column_actions": column_actions,
+        "smart_preview": smart_preview,
         "summary": summary,
         "schema": schema,
         "quality": quality,
@@ -85,8 +111,8 @@ def build_profile_payload(loaded: DataLoadResult) -> dict[str, Any]:
     }
 
 
-def run_profile(loaded: DataLoadResult) -> dict[str, Any]:
-    report = build_profile_payload(loaded)
+def run_profile(loaded: DataLoadResult, business_objective: str | None = None) -> dict[str, Any]:
+    report = build_profile_payload(loaded, business_objective=business_objective)
     report = json_safe(report)
     saved = save_report(report)
     export_markdown(saved)

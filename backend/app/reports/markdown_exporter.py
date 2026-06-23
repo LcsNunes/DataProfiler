@@ -11,6 +11,9 @@ def export_markdown(report: dict[str, Any]) -> str:
     summary = report.get("summary", {})
     target = report.get("target", {})
     recommendation = report.get("recommendation", {})
+    executive = report.get("executive_summary", {})
+    readiness = report.get("readiness", {})
+    column_actions = report.get("column_actions", [])[:12]
     problems = report.get("problems", [])[:20]
     datasets = report.get("datasets", [])
     relationships = report.get("relationships", {})
@@ -28,6 +31,17 @@ def export_markdown(report: dict[str, Any]) -> str:
         f"- Null cells: `{summary.get('null_cells', 0)}`",
         f"- Duplicate rows: `{summary.get('duplicate_rows', 0)}`",
         f"- Likely target: `{target.get('column') or 'not detected'}`",
+        "",
+        "## Executive Summary",
+        "",
+        f"**Headline:** {executive.get('headline', 'n/a')}",
+        f"**Verdict:** {executive.get('verdict', 'n/a')}",
+        f"**Data quality score:** {readiness.get('data_quality_score', 'n/a')}",
+        f"**Modeling readiness score:** {readiness.get('modeling_readiness_score', 'n/a')}",
+        "",
+        "### Immediate Actions",
+        "",
+        *[f"- {item}" for item in executive.get("immediate_actions", [])],
         "",
         "## Recommendation",
         "",
@@ -49,6 +63,13 @@ def export_markdown(report: dict[str, Any]) -> str:
         "## Main Problems",
         "",
         *[f"- `{item.get('column')}`: {item.get('type')} ({item.get('severity')})" for item in problems],
+        "",
+        "## Column Actions",
+        "",
+        *[
+            f"- `{item.get('column')}`: {item.get('recommended_action')} - {' '.join(item.get('strategies', [])[:1])}"
+            for item in column_actions
+        ],
     ]
     if datasets:
         lines.extend(

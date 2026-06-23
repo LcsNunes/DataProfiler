@@ -7,6 +7,13 @@ from typing import Any
 
 from backend.app.core.security import sanitize_for_output
 from backend.app.loaders.base import DataLoadResult
+from backend.app.profiler.actionable_insights import (
+    analysis_context,
+    build_column_actions,
+    build_executive_summary,
+    build_readiness_scores,
+    build_table_map,
+)
 from backend.app.profiler.issue_catalog import explain_problem
 from backend.app.profiler.profile_runner import build_profile_payload
 from backend.app.profiler.utils import json_safe
@@ -249,14 +256,15 @@ def _summary(datasets: list[dict[str, Any]], relationships: dict[str, Any]) -> d
     }
 
 
-def run_multi_profile(loaded_items: list[DataLoadResult]) -> dict[str, Any]:
+def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: str | None = None) -> dict[str, Any]:
     if len(loaded_items) < 2:
         raise ValueError("Multi-dataset profiling requires at least two datasets.")
 
+    context = analysis_context(business_objective)
     datasets = []
     name_counts: dict[str, int] = {}
     for index, loaded in enumerate(loaded_items):
-        dataset = build_profile_payload(loaded)
+        dataset = build_profile_payload(loaded, business_objective=business_objective)
         base_name = _dataset_name(loaded, index)
         name_counts[base_name] = name_counts.get(base_name, 0) + 1
         dataset_name = base_name if name_counts[base_name] == 1 else f"{base_name}_{name_counts[base_name]}"
@@ -285,6 +293,19 @@ def run_multi_profile(loaded_items: list[DataLoadResult]) -> dict[str, Any]:
         quality=quality,
         statistics={},
         target=target,
+        context=context,
+    )
+    readiness = build_readiness_scores(summary, schema, quality, target, relationships)
+    column_actions = build_column_actions(schema, quality, target, limit=120)
+    table_map = build_table_map(datasets, relationships)
+    executive_summary = build_executive_summary(
+        summary=summary,
+        schema=schema,
+        quality=quality,
+        target=target,
+        recommendation=recommendation,
+        readiness=readiness,
+        context=context,
     )
 
     report = json_safe(
@@ -293,6 +314,11 @@ def run_multi_profile(loaded_items: list[DataLoadResult]) -> dict[str, Any]:
             "created_at": datetime.now(timezone.utc).isoformat(),
             "report_type": "multi_dataset",
             "source": source,
+            "analysis_context": context,
+            "executive_summary": executive_summary,
+            "readiness": readiness,
+            "column_actions": column_actions,
+            "smart_preview": {"sample_rows": [], "issue_examples": []},
             "summary": summary,
             "schema": schema,
             "quality": quality,
@@ -303,6 +329,7 @@ def run_multi_profile(loaded_items: list[DataLoadResult]) -> dict[str, Any]:
             "recommendation": recommendation,
             "datasets": datasets,
             "relationships": relationships,
+            "table_map": table_map,
         }
     )
     saved = save_report(report)

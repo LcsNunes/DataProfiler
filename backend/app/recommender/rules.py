@@ -10,6 +10,7 @@ def derive_signals(
     quality: dict[str, Any],
     statistics: dict[str, Any],
     target: dict[str, Any],
+    context: dict[str, Any] | None = None,
 ) -> dict[str, bool]:
     row_count = summary.get("row_count", 0)
     column_count = summary.get("column_count", 0)
@@ -22,6 +23,8 @@ def derive_signals(
     sensitive = any(column.get("possible_sensitive") for column in schema.get("columns", []))
     source_type = source.get("type")
     dataset_count = summary.get("dataset_count", 1)
+    context = context or {}
+    objective_signals = context.get("objective_signals", {})
 
     return {
         "multi_dataset": source_type == "multi_file" or dataset_count > 1,
@@ -42,5 +45,5 @@ def derive_signals(
         "large_sql": source_type == "sql" and row_count >= 50_000,
         "json_or_documental": source_type == "api" and (text_cols + long_text_cols > 0),
         "sensitive_data": sensitive,
-        "natural_language_questions": False,
+        "natural_language_questions": bool(objective_signals.get("mentions_natural_language")),
     }

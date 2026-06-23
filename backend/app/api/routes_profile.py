@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from backend.app.core.config import settings
 from backend.app.core.security import public_error
@@ -42,7 +42,10 @@ def _save_upload(file: UploadFile) -> Path:
 @router.post("/file-path")
 def profile_file_path(request: FilePathRequest) -> dict:
     try:
-        return run_profile(load_file(request.path, enforce_allowed_roots=True, include_path=False))
+        return run_profile(
+            load_file(request.path, enforce_allowed_roots=True, include_path=False),
+            business_objective=request.business_objective,
+        )
     except Exception as exc:
         raise _public_exception(exc) from exc
 
@@ -51,25 +54,28 @@ def profile_file_path(request: FilePathRequest) -> dict:
 def profile_file_paths(request: FilePathsRequest) -> dict:
     try:
         loaded_items = [load_file(path, enforce_allowed_roots=True, include_path=False) for path in request.paths]
-        return run_multi_profile(loaded_items)
+        return run_multi_profile(loaded_items, business_objective=request.business_objective)
     except Exception as exc:
         raise _public_exception(exc) from exc
 
 
 @router.post("/upload")
-def profile_upload(file: UploadFile = File(...)) -> dict:
+def profile_upload(file: UploadFile = File(...), business_objective: str | None = Form(default=None)) -> dict:
     try:
         destination = _save_upload(file)
         loaded = load_file(str(destination), include_path=False)
         loaded.source["name"] = Path(file.filename or destination.name).name
         loaded.metadata["original_file_name"] = loaded.source["name"]
-        return run_profile(loaded)
+        return run_profile(loaded, business_objective=business_objective)
     except Exception as exc:
         raise _public_exception(exc) from exc
 
 
 @router.post("/upload-multiple")
-def profile_upload_multiple(files: list[UploadFile] = File(...)) -> dict:
+def profile_upload_multiple(
+    files: list[UploadFile] = File(...),
+    business_objective: str | None = Form(default=None),
+) -> dict:
     try:
         if len(files) < 2:
             raise ValueError("Upload at least two files for multi-dataset analysis.")
@@ -81,7 +87,7 @@ def profile_upload_multiple(files: list[UploadFile] = File(...)) -> dict:
             loaded.source["name"] = safe_name
             loaded.metadata["original_file_name"] = safe_name
             loaded_items.append(loaded)
-        return run_multi_profile(loaded_items)
+        return run_multi_profile(loaded_items, business_objective=business_objective)
     except Exception as exc:
         raise _public_exception(exc) from exc
 
@@ -89,7 +95,7 @@ def profile_upload_multiple(files: list[UploadFile] = File(...)) -> dict:
 @router.post("/api")
 def profile_api(request: ApiSourceRequest) -> dict:
     try:
-        return run_profile(load_api(request))
+        return run_profile(load_api(request), business_objective=request.business_objective)
     except Exception as exc:
         raise _public_exception(exc) from exc
 
@@ -97,6 +103,6 @@ def profile_api(request: ApiSourceRequest) -> dict:
 @router.post("/sql")
 def profile_sql(request: SqlSourceRequest) -> dict:
     try:
-        return run_profile(load_sql(request))
+        return run_profile(load_sql(request), business_objective=request.business_objective)
     except Exception as exc:
         raise _public_exception(exc) from exc

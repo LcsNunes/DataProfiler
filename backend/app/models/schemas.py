@@ -7,10 +7,12 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 class FilePathRequest(BaseModel):
     path: str = Field(..., min_length=1)
+    business_objective: str | None = Field(default=None, max_length=500)
 
 
 class FilePathsRequest(BaseModel):
     paths: list[str] = Field(..., min_length=2)
+    business_objective: str | None = Field(default=None, max_length=500)
 
     @field_validator("paths")
     @classmethod
@@ -66,6 +68,7 @@ class ApiSourceRequest(BaseModel):
     retries: int = Field(default=1, ge=0, le=5)
     data_path: str | None = None
     pagination: ApiPaginationConfig = Field(default_factory=ApiPaginationConfig)
+    business_objective: str | None = Field(default=None, max_length=500)
 
     @field_validator("method", mode="before")
     @classmethod
@@ -85,6 +88,7 @@ class SqlSourceRequest(BaseModel):
     table: str | None = None
     query: str | None = None
     limit: int | None = Field(default=5000, ge=1, le=1_000_000)
+    business_objective: str | None = Field(default=None, max_length=500)
 
     @model_validator(mode="after")
     def require_table_or_query(self) -> "SqlSourceRequest":
