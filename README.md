@@ -1,41 +1,43 @@
 # Data Profiler AI
 
-Ferramenta web e CLI para leitura automática, análise exploratória, diagnóstico de qualidade dos dados e recomendação interpretável de abordagem/modelo.
+Ferramenta web e CLI para leitura automatica, analise exploratoria, diagnostico de qualidade dos dados e recomendacao deterministica de abordagem/modelo.
+
+O projeto foi pensado para uso local em `localhost`, acelerando uma primeira leitura de bases recebidas de clientes sem substituir uma validacao estatistica completa.
 
 ## Stack
 
-- Backend: Python, FastAPI, Pydantic
-- Dados: Polars como principal; Pandas como fallback para Excel, SQL e normalização JSON
-- Frontend: Next.js, React, TypeScript
-- Visualização: ECharts com opções JSON geradas pelo backend
-- Recomendações: catálogo YAML editável em `backend/config/model_catalog.yaml`
+- Backend: Python, FastAPI, Pydantic.
+- Dados: Polars como engine principal; Pandas como fallback para Excel, SQL e normalizacao JSON.
+- Frontend: Next.js, React, TypeScript.
+- Visualizacao: ECharts com opcoes JSON geradas pelo backend.
+- Recomendacoes: catalogo YAML editavel em `backend/config/model_catalog.yaml`.
 
 ## Estrutura
 
 ```text
 data_profiler_ai/
-├── backend/
-│   ├── main.py
-│   ├── cli.py
-│   ├── requirements.txt
-│   ├── app/
-│   │   ├── api/
-│   │   ├── core/
-│   │   ├── loaders/
-│   │   ├── profiler/
-│   │   ├── recommender/
-│   │   ├── reports/
-│   │   └── models/
-│   ├── config/model_catalog.yaml
-│   └── tests/
-├── frontend/
-├── examples/
-├── reports/
-├── README.md
-└── docker-compose.yml
+|-- backend/
+|   |-- main.py
+|   |-- cli.py
+|   |-- requirements.txt
+|   |-- app/
+|   |   |-- api/
+|   |   |-- core/
+|   |   |-- loaders/
+|   |   |-- profiler/
+|   |   |-- recommender/
+|   |   |-- reports/
+|   |   `-- models/
+|   |-- config/model_catalog.yaml
+|   `-- tests/
+|-- frontend/
+|-- examples/
+|-- reports/
+|-- README.md
+`-- docker-compose.yml
 ```
 
-## Instalação
+## Instalacao
 
 Execute os comandos a partir da pasta `data_profiler_ai`.
 
@@ -68,8 +70,7 @@ Backend:
 uvicorn backend.main:app --reload
 ```
 
-Por seguranca, os endpoints HTTP de caminho local aceitam apenas arquivos dentro de `DATA_PROFILER_ALLOWED_PATHS`.
-Se a variavel nao for definida, o diretorio permitido padrao e a raiz do projeto.
+Por seguranca, os endpoints HTTP de caminho local aceitam apenas arquivos dentro de `DATA_PROFILER_ALLOWED_PATHS`. Se a variavel nao for definida, o diretorio permitido padrao e a raiz do projeto.
 
 Exemplo para permitir outra pasta de dados:
 
@@ -96,13 +97,14 @@ Abra `http://localhost:3000`.
 
 ```bash
 python -m backend.cli --path "./examples/customers.csv"
+python -m backend.cli --path "./examples/customers.csv" --objective "entender churn e preparar baseline"
 python -m backend.cli --paths "./examples/customers.csv" "./examples/sales.xlsx" "./examples/nested.json"
 python -m backend.cli --path "./examples/sales.xlsx"
 python -m backend.cli --api-config "./examples/api_config.json"
 python -m backend.cli --sql-config "./examples/sql_config.json"
 ```
 
-Cada execução cria um relatório em `reports/{report_id}/report.json` e `reports/{report_id}/report.md`.
+Cada execucao cria um relatorio em `reports/{report_id}/report.json` e `reports/{report_id}/report.md`.
 
 ## API Principal
 
@@ -127,39 +129,55 @@ Exemplo:
 ```bash
 curl -X POST http://localhost:8000/profile/file-path \
   -H "Content-Type: application/json" \
-  -d "{\"path\":\"./examples/customers.csv\"}"
+  -d "{\"path\":\"./examples/customers.csv\",\"business_objective\":\"entender churn\"}"
 ```
 
-## O Que A Análise Detecta
+## Fluxo Guiado De Analise
+
+O frontend aceita um objetivo opcional da analise. Esse texto nao chama LLM; ele e usado por regras deterministicamente para ajustar sinais, prioridade dos insights e recomendacoes.
+
+O relatorio agora inclui:
+
+- Resumo executivo com principais achados, riscos imediatos e proximas acoes.
+- Score de qualidade dos dados e score de prontidao para modelagem.
+- Score de prontidao de joins quando a analise tem multiplas bases.
+- Plano de acao por coluna com significado do problema, cuidado e estrategia recomendada.
+- Preview inteligente com amostras de linhas e exemplos de problemas encontrados.
+- Mapa de tabelas para analises multi-base, mostrando datasets e possiveis relacoes.
+
+## O Que A Analise Detecta
 
 - Tipo do arquivo, encoding e separador de CSV, abas de Excel, schema inicial e tipos.
-- Múltiplos arquivos em uma única análise, com resumo consolidado por dataset.
-- Colunas compartilhadas, possíveis joins, grupos com schemas compatíveis e overlap entre tabelas.
-- Colunas numéricas, categóricas, textuais, booleanas e datas.
-- Possível target, tipo de problema, distribuição de classes e desbalanceamento.
-- Nulos, strings vazias, espaços em branco, duplicados, linhas vazias, constantes, quase constantes, alta cardinalidade, IDs, chaves primárias, datas inválidas, inconsistências, outliers, problemas de encoding e mistura de tipos.
-- Legenda explicativa para cada tipo de alerta, com significado, cuidados e estratégias recomendadas.
-- Estatísticas descritivas, cardinalidade, top valores e gráficos JSON para o frontend.
+- Multiplos arquivos em uma unica analise, com resumo consolidado por dataset.
+- Colunas compartilhadas, possiveis joins, grupos com schemas compativeis e overlap entre tabelas.
+- Colunas numericas, categoricas, textuais, booleanas e datas.
+- Possivel target, tipo de problema, distribuicao de classes e desbalanceamento.
+- Nulos, strings vazias, espacos em branco, duplicados, linhas vazias, constantes, quase constantes, alta cardinalidade, IDs, chaves primarias, datas invalidas, inconsistencias, outliers, problemas de encoding e mistura de tipos.
+- Legenda explicativa para cada tipo de alerta, com significado, cuidados e estrategias recomendadas.
+- Estatisticas descritivas, cardinalidade, top valores e graficos JSON para o frontend.
 
-## Catálogo De Recomendações
+## Catalogo De Recomendacoes
 
-O arquivo `backend/config/model_catalog.yaml` define regras interpretáveis com sinais como `has_target`, `many_nulls_or_inconsistencies`, `short_text`, `long_text`, `api_source`, `large_sql`, `sensitive_data`, `no_target` e `target_imbalanced`.
+O arquivo `backend/config/model_catalog.yaml` define regras interpretaveis com sinais como `has_target`, `many_nulls_or_inconsistencies`, `short_text`, `long_text`, `api_source`, `large_sql`, `sensitive_data`, `no_target`, `target_imbalanced` e `natural_language_questions`.
 
-A saída contém:
+A saida contem:
 
 - abordagem recomendada;
-- modelos ou técnicas sugeridas;
-- confiança;
+- modelos ou tecnicas sugeridas;
+- confianca;
 - justificativa;
 - riscos;
-- próximos passos;
-- o que não fazer;
-- pré-processamentos necessários.
+- proximos passos;
+- o que nao fazer;
+- pre-processamentos necessarios.
 
 ## Testes
 
 ```bash
 pytest backend/tests
+cd frontend
+npm run lint
+npm run build
 ```
 
 ## Docker Compose
@@ -170,16 +188,16 @@ docker compose up
 
 Backend em `http://localhost:8000` e frontend em `http://localhost:3000`.
 
-## Segurança
+## Seguranca
 
-- Tokens, API keys, senhas e `Authorization` são mascarados antes de entrar em relatórios ou respostas de preview.
+- Tokens, API keys, senhas e `Authorization` sao mascarados antes de entrar em relatorios ou respostas de preview.
 - O frontend usa campos `password` para segredos.
-- Connection strings SQL têm senha mascarada no relatório.
+- Connection strings SQL tem senha mascarada no relatorio.
 - Uploads recebem nome unico, limite de tamanho e validacao de extensao antes da analise.
 - `/profile/file-path` e `/profile/file-paths` usam allowlist de diretorios via `DATA_PROFILER_ALLOWED_PATHS`.
 - `/profile/api` bloqueia hosts privados, loopback, link-local e redirects por padrao para reduzir SSRF. Para ambiente local controlado, use `DATA_PROFILER_ALLOW_PRIVATE_API_HOSTS=true`.
-- Queries SQL livres aceitam apenas `SELECT` ou `WITH`; para producao, prefira fontes cadastradas server-side e credenciais read-only.
-- Em producao, defina `NEXT_PUBLIC_API_BASE_URL` ou use proxy no mesmo dominio; o frontend nao assume `localhost` em build de producao.
+- Queries SQL livres aceitam apenas `SELECT` ou `WITH`; prefira credenciais read-only.
+- Em producao, defina `NEXT_PUBLIC_API_BASE_URL` ou use proxy no mesmo dominio.
 
 Variaveis uteis:
 
@@ -190,19 +208,20 @@ DATA_PROFILER_ALLOW_PRIVATE_API_HOSTS=false
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
-## Limitações Conhecidas
+## Limitacoes Conhecidas
 
 - O suporte PostgreSQL/MySQL depende dos drivers instalados e de conectividade externa.
-- Correlação e gráficos pesados são limitados a subconjuntos de colunas para manter performance.
-- Detecção de target e semântica de colunas é heurística e deve ser validada por uma pessoa.
+- Correlacao e graficos pesados sao limitados a subconjuntos de colunas para manter performance.
+- Deteccao de target e semantica de colunas e heuristica e deve ser validada por uma pessoa.
+- O profiler e deterministico, mas ainda pode ter bugs de implementacao, leitura incorreta de arquivos ou heuristicas inadequadas para certos dominios.
 - A API externa fake em `examples/api_config.json` requer internet.
-- O profiler não substitui validação estatística formal nem governança de dados.
+- O profiler nao substitui validacao estatistica formal nem governanca de dados.
 
-## Próximos Passos Recomendados
+## Proximos Passos Recomendados
 
-- Adicionar autenticação no backend se a ferramenta for exposta fora da máquina local.
+- Adicionar presets de analise por dominio, como vendas, financeiro, CRM e operacoes.
 - Criar cache/amostragem incremental para bases grandes.
-- Adicionar exportação HTML.
+- Adicionar exportacao HTML.
 - Adicionar conectores cloud storage.
-- Evoluir o catálogo YAML para incluir pesos, limiares configuráveis e versionamento por domínio.
-- Adicionar validações Great Expectations ou Pandera para pipelines de limpeza.
+- Evoluir o catalogo YAML para incluir pesos, limiares configuraveis e versionamento por dominio.
+- Adicionar validacoes Great Expectations ou Pandera para pipelines de limpeza.
