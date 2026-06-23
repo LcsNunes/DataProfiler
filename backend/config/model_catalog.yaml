@@ -1,0 +1,332 @@
+version: 1
+default:
+  id: default_exploratory
+  recommended_approach: "Análise exploratória estruturada"
+  confidence: "medium"
+  suggested_models:
+    - "Baseline estatístico"
+    - "Modelos simples após validação do objetivo"
+  why:
+    - "Os sinais detectados não apontam para um cenário específico o suficiente para uma recomendação mais restrita."
+  risks:
+    - "Escolher modelo antes de validar objetivo, target e qualidade pode levar a resultados frágeis."
+  next_steps:
+    - "Validar objetivo analítico com o usuário."
+    - "Revisar tipos, nulos, duplicados e campos sensíveis."
+  not_recommended:
+    - "Treinar modelo complexo sem baseline e sem validação da qualidade dos dados."
+  required_preprocessing:
+    - "Padronizar tipos e tratar valores ausentes antes de modelagem."
+
+rules:
+  - id: multi_dataset_relationship_analysis
+    priority: 110
+    match: ["multi_dataset"]
+    recommended_approach: "Análise multi-tabela + modelagem após entendimento relacional"
+    confidence: "high"
+    suggested_models:
+      - "Modelo relacional após definição da tabela entidade"
+      - "Feature engineering por joins e agregações"
+      - "Baseline tabular por tabela principal"
+      - "Camada semântica/SQL se o objetivo for perguntas sobre múltiplas bases"
+    why:
+      - "Foram analisadas múltiplas bases que podem representar entidades complementares do cliente."
+      - "Antes de treinar modelo, é necessário identificar chaves, granularidade e tabela principal."
+      - "Colunas compartilhadas podem indicar joins, mas precisam ser validadas semanticamente."
+    risks:
+      - "Juntar tabelas sem validar cardinalidade pode duplicar linhas e distorcer métricas."
+      - "Targets podem estar em uma tabela diferente das features, exigindo cuidado contra vazamento."
+    next_steps:
+      - "Validar quais bases representam entidades, eventos, dimensões ou fatos."
+      - "Confirmar chaves primárias e estrangeiras candidatas."
+      - "Definir tabela principal e granularidade do problema antes da modelagem."
+      - "Criar features agregadas por entidade quando houver tabelas transacionais."
+    not_recommended:
+      - "Concatenar arquivos diferentes como se fossem uma única tabela sem comparar schemas."
+      - "Fazer joins automáticos em produção sem validação de cardinalidade."
+    required_preprocessing:
+      - "Mapeamento de relacionamento entre tabelas."
+      - "Validação de chaves e cardinalidade."
+      - "Padronização de nomes e tipos de colunas compartilhadas."
+
+  - id: tabular_small_clean_with_target
+    priority: 80
+    match: ["tabular", "small_dataset", "clean", "has_target"]
+    exclude: ["target_imbalanced"]
+    recommended_approach: "ML clássico com baseline interpretável"
+    confidence: "high"
+    suggested_models:
+      - "Logistic Regression"
+      - "Random Forest"
+      - "LightGBM ou XGBoost, se disponível"
+    why:
+      - "A base é majoritariamente tabular."
+      - "Existe uma possível coluna target."
+      - "Não há sinais fortes de sujeira estrutural."
+      - "LLM não é necessariamente a melhor primeira opção para previsão linha a linha em dados tabulares."
+    risks:
+      - "A coluna target ainda precisa ser confirmada com o usuário."
+    next_steps:
+      - "Validar target e métrica de negócio."
+      - "Separar treino e teste."
+      - "Treinar baseline simples antes de modelos mais complexos."
+    not_recommended:
+      - "Usar LLM diretamente para prever cada linha sem baseline estatística."
+    required_preprocessing:
+      - "Codificar categóricas e escalar numéricas apenas quando o modelo exigir."
+
+  - id: dirty_tabular_data
+    priority: 95
+    match: ["tabular", "many_nulls_or_inconsistencies"]
+    recommended_approach: "Limpeza e validação antes de modelagem"
+    confidence: "high"
+    suggested_models:
+      - "Great Expectations ou validações customizadas"
+      - "Baseline somente após limpeza"
+    why:
+      - "A base apresenta nulos relevantes, inconsistências ou tipos misturados."
+      - "Modelar antes de limpar pode aprender padrões de erro em vez de padrões reais."
+    risks:
+      - "Treinar antes de tratar nulos pode gerar viés."
+      - "Métricas podem parecer boas por vazamento ou inconsistência de schema."
+    next_steps:
+      - "Definir regras de imputação ou descarte."
+      - "Padronizar datas, booleanos e categorias."
+      - "Reexecutar o perfil após a limpeza."
+    not_recommended:
+      - "Aplicar modelos avançados antes de resolver problemas básicos de qualidade."
+    required_preprocessing:
+      - "Tratamento de nulos."
+      - "Normalização de strings."
+      - "Correção de tipos misturados."
+
+  - id: many_categorical_columns
+    priority: 70
+    match: ["many_categorical"]
+    recommended_approach: "Modelagem tabular com atenção a categóricas"
+    confidence: "medium"
+    suggested_models:
+      - "CatBoost"
+      - "LightGBM"
+      - "Random Forest"
+      - "Logistic Regression com encoding adequado"
+    why:
+      - "A base tem proporção relevante de colunas categóricas."
+      - "Cardinalidade e encoding podem dominar o desempenho do modelo."
+    risks:
+      - "One-hot encoding em alta cardinalidade pode explodir dimensionalidade."
+    next_steps:
+      - "Separar categóricas de baixa e alta cardinalidade."
+      - "Testar target encoding, hashing ou modelos que lidem bem com categóricas."
+    not_recommended:
+      - "Aplicar one-hot encoding cegamente em todas as colunas."
+    required_preprocessing:
+      - "Análise de cardinalidade."
+      - "Encoding categórico controlado."
+
+  - id: short_text_data
+    priority: 75
+    match: ["short_text"]
+    recommended_approach: "Embeddings + classificador ou LLM para análise semântica"
+    confidence: "medium"
+    suggested_models:
+      - "Embeddings sentence-level"
+      - "Logistic Regression sobre embeddings"
+      - "Gradient Boosting sobre embeddings"
+      - "LLM para rotulação assistida"
+    why:
+      - "Há colunas de texto livre curto."
+      - "Embeddings capturam semântica melhor que bag-of-words simples em muitos cenários."
+    risks:
+      - "Texto pode conter dados sensíveis ou ruído operacional."
+    next_steps:
+      - "Limpar texto e remover PII quando necessário."
+      - "Criar baseline TF-IDF antes de embeddings se o volume for pequeno."
+    not_recommended:
+      - "Enviar texto sensível para APIs externas sem anonimização."
+    required_preprocessing:
+      - "Normalização textual."
+      - "Detecção e mascaramento de PII."
+
+  - id: long_text_data
+    priority: 82
+    match: ["long_text"]
+    recommended_approach: "Embeddings, RAG ou LLM com janela adequada"
+    confidence: "medium"
+    suggested_models:
+      - "Embeddings para busca semântica"
+      - "RAG"
+      - "LLM com chunking"
+    why:
+      - "Há textos longos que podem exceder abordagens tabulares tradicionais."
+      - "Chunking e recuperação semântica tendem a ser mais robustos para documentos longos."
+    risks:
+      - "Truncar textos longos pode remover evidências importantes."
+    next_steps:
+      - "Definir estratégia de chunking."
+      - "Avaliar se a tarefa é classificação, extração ou busca."
+    not_recommended:
+      - "Concatenar documentos longos sem controle de contexto."
+    required_preprocessing:
+      - "Chunking."
+      - "Deduplicação e limpeza textual."
+
+  - id: api_json_documental
+    priority: 78
+    match: ["api_source", "json_or_documental"]
+    recommended_approach: "Normalização de JSON + embeddings/RAG quando houver busca semântica"
+    confidence: "medium"
+    suggested_models:
+      - "Flatten JSON"
+      - "Embeddings"
+      - "RAG"
+    why:
+      - "Os dados vêm de API e incluem campos textuais ou semiestruturados."
+      - "Schema de API pode variar entre páginas ou chamadas."
+    risks:
+      - "Campos ausentes e paginação incompleta podem enviesar a análise."
+    next_steps:
+      - "Validar paginação e consistência de schema."
+      - "Persistir payload bruto se houver auditoria."
+    not_recommended:
+      - "Assumir que a primeira página representa todo o schema."
+    required_preprocessing:
+      - "Flatten de JSON aninhado."
+      - "Validação de campos obrigatórios."
+
+  - id: large_sql
+    priority: 88
+    match: ["sql_source", "large_sql"]
+    recommended_approach: "Análise no banco + agregações SQL"
+    confidence: "high"
+    suggested_models:
+      - "SQL analytics"
+      - "Amostragem estratificada"
+      - "Text-to-SQL com guardrails se o objetivo for consulta em linguagem natural"
+    why:
+      - "A origem é SQL e o volume carregado é grande."
+      - "Empurrar agregações para o banco reduz custo de memória e latência."
+    risks:
+      - "Extrair tabelas grandes integralmente pode ser lento e caro."
+    next_steps:
+      - "Criar queries agregadas para perfilamento incremental."
+      - "Adicionar índices ou views materializadas quando necessário."
+    not_recommended:
+      - "Carregar todo o banco na aplicação sem filtros."
+    required_preprocessing:
+      - "Amostragem ou agregações SQL antes da análise local."
+
+  - id: api_source
+    priority: 72
+    match: ["api_source"]
+    recommended_approach: "Validação de API antes de análise/modelagem"
+    confidence: "medium"
+    suggested_models:
+      - "Validação de schema"
+      - "Monitoramento de qualidade por lote"
+    why:
+      - "Dados vindos de API dependem de paginação, limites de requisição e estabilidade de schema."
+    risks:
+      - "Rate limits, páginas ausentes e mudanças de contrato podem produzir amostras incompletas."
+    next_steps:
+      - "Validar paginação, retries e extração dos dados."
+      - "Checar campos ausentes entre páginas."
+    not_recommended:
+      - "Treinar modelo assumindo que uma única resposta da API representa o universo de dados."
+    required_preprocessing:
+      - "Controle de paginação."
+      - "Validação de schema por página."
+
+  - id: sensitive_data
+    priority: 100
+    match: ["sensitive_data"]
+    recommended_approach: "Ambiente privado, anonimização e governança antes de modelagem"
+    confidence: "high"
+    suggested_models:
+      - "Modelos locais quando possível"
+      - "Anonimização ou pseudonimização"
+      - "Classificadores tabulares após mascaramento"
+    why:
+      - "Foram detectados possíveis campos sensíveis."
+      - "Privacidade e compliance devem preceder qualquer envio para APIs externas."
+    risks:
+      - "Vazamento de PII ou credenciais em logs, prompts ou datasets de treino."
+    next_steps:
+      - "Confirmar quais campos são sensíveis."
+      - "Aplicar mascaramento, hashing ou remoção antes de experimentos."
+    not_recommended:
+      - "Enviar dados sensíveis brutos para LLMs ou APIs externas."
+    required_preprocessing:
+      - "Anonimização."
+      - "Controle de acesso."
+      - "Auditoria de logs."
+
+  - id: no_target
+    priority: 86
+    match: ["no_target"]
+    recommended_approach: "Exploração, clusterização ou definição de objetivo antes de treino supervisionado"
+    confidence: "medium"
+    suggested_models:
+      - "EDA"
+      - "Clusterização"
+      - "Detecção de anomalias"
+      - "Regras de negócio para definição de target"
+    why:
+      - "Não foi detectada uma coluna target confiável."
+      - "Treino supervisionado exige uma variável alvo validada."
+    risks:
+      - "Criar target artificial sem validação pode induzir conclusões incorretas."
+    next_steps:
+      - "Definir pergunta de negócio."
+      - "Validar se existe target fora da base atual."
+      - "Usar clusterização apenas como exploração, não como verdade final."
+    not_recommended:
+      - "Treinar classificador supervisionado sem target real."
+    required_preprocessing:
+      - "Definição do objetivo analítico."
+
+  - id: imbalanced_target
+    priority: 92
+    match: ["target_imbalanced"]
+    recommended_approach: "ML clássico com validação estratificada e métricas para desbalanceamento"
+    confidence: "high"
+    suggested_models:
+      - "Logistic Regression com class_weight"
+      - "Random Forest com class_weight"
+      - "LightGBM ou XGBoost com pesos"
+    why:
+      - "A possível coluna target apresenta desbalanceamento relevante."
+      - "Acurácia pode ser enganosa em bases desbalanceadas."
+    risks:
+      - "Modelo pode ignorar a classe minoritária."
+      - "Oversampling mal aplicado pode causar vazamento entre treino e teste."
+    next_steps:
+      - "Usar split estratificado."
+      - "Avaliar F1, recall, precision, PR-AUC e ROC-AUC."
+      - "Ajustar threshold conforme custo de falso positivo e falso negativo."
+    not_recommended:
+      - "Otimizar apenas acurácia."
+    required_preprocessing:
+      - "Validação estratificada."
+      - "Tratamento de desbalanceamento quando fizer sentido."
+
+  - id: natural_language_layer
+    priority: 65
+    match: ["natural_language_questions"]
+    recommended_approach: "Agente com tool calling, SQL/Python tools e guardrails"
+    confidence: "medium"
+    suggested_models:
+      - "LLM com function calling"
+      - "Text-to-SQL com validação"
+      - "Python sandbox para análises controladas"
+    why:
+      - "O objetivo declarado é responder perguntas em linguagem natural sobre dados."
+    risks:
+      - "Agentes sem guardrails podem executar consultas caras ou revelar dados sensíveis."
+    next_steps:
+      - "Definir permissões de ferramentas."
+      - "Adicionar validação de SQL e limites de custo."
+    not_recommended:
+      - "Permitir execução livre de código ou SQL sem revisão."
+    required_preprocessing:
+      - "Catálogo de tabelas e políticas de acesso."
