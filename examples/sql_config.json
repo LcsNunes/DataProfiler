@@ -1,0 +1,6 @@
+{
+  "connection_string": "sqlite:///./examples/example.db",
+  "table": "customers",
+  "limit": 1000
+}
+

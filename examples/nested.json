@@ -1,0 +1,26 @@
+{
+  "response": {
+    "items": [
+      {
+        "id": 1,
+        "customer": {"name": "Ana", "segment": "premium"},
+        "metrics": {"orders": 12, "revenue": 5200.5},
+        "feedback": {"text": "Entrega rapida e bom atendimento"}
+      },
+      {
+        "id": 2,
+        "customer": {"name": "Bruno", "segment": "standard"},
+        "metrics": {"orders": 2, "revenue": 300.0},
+        "feedback": {"text": "Produto chegou com atraso"}
+      },
+      {
+        "id": 3,
+        "customer": {"name": "Carla", "segment": "premium"},
+        "metrics": {"orders": 7, "revenue": 1800.0},
+        "feedback": {"text": "Quer receber ofertas por email"}
+      }
+    ]
+  },
+  "next_token": null
+}
+

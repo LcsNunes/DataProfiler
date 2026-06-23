@@ -1,0 +1,15 @@
+customer_id,name,email,age,income,signup_date,city,status,churn,notes
+1,Ana Silva,ana@example.com,34,5200,2024-01-10,Sao Paulo,active,no,"cliente recorrente"
+2,Bruno Costa,bruno@example.com,41,7100,2024-02-12,Rio de Janeiro,active,no,""
+3,Carla Lima,carla@example.com,,3900,2024-03-05,Belo Horizonte,active,no,"pediu desconto"
+4,Daniel Rocha,daniel@example.com,29,,2024-04-18,Sao Paulo,inactive,yes,"cancelou por preço"
+5,Eva Martins,eva@example.com,52,9800,invalid-date,Curitiba,active,no,"   "
+6,Felipe Souza,felipe@example.com,37,6100,2024-05-20,Porto Alegre,active,no,"cliente premium"
+7,Gabriela Alves,gabriela@example.com,33,5900,2024-06-01,Sao Paulo,active,no,"cliente premium"
+8,Henrique Dias,henrique@example.com,45,8500,2024-06-15,Salvador,active,no,""
+8,Henrique Dias,henrique@example.com,45,8500,2024-06-15,Salvador,active,no,""
+9,Isabela Nunes,isabela@example.com,28,4300,2024-07-09,Recife,active,no,"novo cadastro"
+10,Joao Pinto,joao@example.com,61,12000,2024-07-21,,inactive,yes,"alto valor"
+11,Katia Ramos,katia@example.com,39,NaN,2024-08-02,Sao Paulo,active,no,"renda ausente"
+12,Lucas Ferreira,lucas@example.com,not informed,6700,2024-08-19,Campinas,active,no,"idade com tipo misto"
+
