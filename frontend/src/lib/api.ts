@@ -33,32 +33,34 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export function profileFilePath(path: string) {
+export function profileFilePath(path: string, businessObjective?: string) {
   return request<ProfileReport>("/profile/file-path", {
     method: "POST",
-    body: JSON.stringify({ path })
+    body: JSON.stringify({ path, business_objective: businessObjective || null })
   });
 }
 
-export function profileFilePaths(paths: string[]) {
+export function profileFilePaths(paths: string[], businessObjective?: string) {
   return request<ProfileReport>("/profile/file-paths", {
     method: "POST",
-    body: JSON.stringify({ paths })
+    body: JSON.stringify({ paths, business_objective: businessObjective || null })
   });
 }
 
-export function profileUpload(file: File) {
+export function profileUpload(file: File, businessObjective?: string) {
   const form = new FormData();
   form.append("file", file);
+  if (businessObjective) form.append("business_objective", businessObjective);
   return request<ProfileReport>("/profile/upload", {
     method: "POST",
     body: form
   });
 }
 
-export function profileUploadMultiple(files: File[]) {
+export function profileUploadMultiple(files: File[], businessObjective?: string) {
   const form = new FormData();
   files.forEach((file) => form.append("files", file));
+  if (businessObjective) form.append("business_objective", businessObjective);
   return request<ProfileReport>("/profile/upload-multiple", {
     method: "POST",
     body: form

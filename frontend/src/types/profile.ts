@@ -33,6 +33,44 @@ export type ColumnProfile = {
   problems: string[];
 };
 
+export type ExecutiveSummary = {
+  headline: string;
+  verdict: string;
+  top_findings: string[];
+  immediate_actions: string[];
+  recommended_approach?: string;
+};
+
+export type Readiness = {
+  data_quality_score: number;
+  data_quality_label: string;
+  modeling_readiness_score: number;
+  modeling_readiness_label: string;
+  join_readiness_score?: number | null;
+  join_readiness_label?: string | null;
+  drivers: AnyRecord;
+};
+
+export type ColumnAction = {
+  column: string;
+  semantic_type: string;
+  recommended_action: string;
+  role: string;
+  priority: string;
+  reasons: string[];
+  strategies: string[];
+};
+
+export type SmartPreview = {
+  sample_rows: AnyRecord[];
+  issue_examples: Array<{ column: string; type: string; examples: AnyRecord[] }>;
+};
+
+export type TableMap = {
+  nodes: Array<{ id: string; label: string; row_count: number; column_count: number; target?: string | null }>;
+  edges: Array<{ source: string; target: string; shared_columns: string[]; overlap_pct: number; relationship_hint: string }>;
+};
+
 export type Problem = {
   column: string;
   type: string;
@@ -55,6 +93,11 @@ export type ProfileReport = {
   created_at: string;
   report_type?: "single_dataset" | "multi_dataset";
   source: AnyRecord;
+  analysis_context?: AnyRecord;
+  executive_summary?: ExecutiveSummary;
+  readiness?: Readiness;
+  column_actions?: ColumnAction[];
+  smart_preview?: SmartPreview;
   summary: AnyRecord;
   schema: {
     columns: ColumnProfile[];
@@ -69,6 +112,7 @@ export type ProfileReport = {
   recommendation: Recommendation;
   datasets?: ProfileDataset[];
   relationships?: MultiDatasetRelationships;
+  table_map?: TableMap;
   report_path?: string;
   markdown_path?: string;
 };

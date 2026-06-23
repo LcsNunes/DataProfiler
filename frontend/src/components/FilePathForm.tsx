@@ -4,7 +4,13 @@ import { useState } from "react";
 import { profileFilePath, profileFilePaths } from "@/lib/api";
 import type { ProfileReport } from "@/types/profile";
 
-export function FilePathForm({ onReport }: { onReport: (report: ProfileReport) => void }) {
+export function FilePathForm({
+  onReport,
+  businessObjective
+}: {
+  onReport: (report: ProfileReport) => void;
+  businessObjective?: string;
+}) {
   const [path, setPath] = useState("./examples/customers.csv");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +23,11 @@ export function FilePathForm({ onReport }: { onReport: (report: ProfileReport) =
     setLoading(true);
     setError(null);
     try {
-      onReport(paths.length > 1 ? await profileFilePaths(paths) : await profileFilePath(paths[0] ?? path));
+      onReport(
+        paths.length > 1
+          ? await profileFilePaths(paths, businessObjective)
+          : await profileFilePath(paths[0] ?? path, businessObjective)
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao analisar caminho.");
     } finally {

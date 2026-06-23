@@ -12,6 +12,7 @@ type Tab = "upload" | "path" | "api" | "sql";
 export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport) => void }) {
   const [tab, setTab] = useState<Tab>("upload");
   const [files, setFiles] = useState<File[]>([]);
+  const [businessObjective, setBusinessObjective] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +21,11 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
     setLoading(true);
     setError(null);
     try {
-      onReport(files.length === 1 ? await profileUpload(files[0]) : await profileUploadMultiple(files));
+      onReport(
+        files.length === 1
+          ? await profileUpload(files[0], businessObjective)
+          : await profileUploadMultiple(files, businessObjective)
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha no upload.");
     } finally {
@@ -41,6 +46,15 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
             {label}
           </button>
         ))}
+      </div>
+
+      <div className="field objective-field">
+        <label>Objetivo da analise (opcional)</label>
+        <textarea
+          value={businessObjective}
+          onChange={(event) => setBusinessObjective(event.target.value)}
+          placeholder="Ex: entender churn, validar qualidade, responder perguntas em linguagem natural, detectar fraude"
+        />
       </div>
 
       {tab === "upload" && (
@@ -64,9 +78,9 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
         </div>
       )}
 
-      {tab === "path" && <FilePathForm onReport={onReport} />}
-      {tab === "api" && <ApiSourceForm onReport={onReport} />}
-      {tab === "sql" && <SqlSourceForm onReport={onReport} />}
+      {tab === "path" && <FilePathForm onReport={onReport} businessObjective={businessObjective} />}
+      {tab === "api" && <ApiSourceForm onReport={onReport} businessObjective={businessObjective} />}
+      {tab === "sql" && <SqlSourceForm onReport={onReport} businessObjective={businessObjective} />}
     </section>
   );
 }

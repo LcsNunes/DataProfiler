@@ -414,6 +414,64 @@ th {
   gap: 18px;
 }
 
+.executive-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 16px;
+}
+
+.executive-brief {
+  border: 1px solid var(--ink);
+  border-radius: 30px;
+  padding: 28px;
+  background:
+    linear-gradient(135deg, rgba(23, 32, 29, 0.94), rgba(61, 107, 100, 0.88)),
+    var(--ink);
+  color: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.executive-brief p {
+  color: rgba(244, 237, 223, 0.76);
+  line-height: 1.65;
+}
+
+.score-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.score-card {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 14px;
+  background: rgba(255, 250, 239, 0.72);
+}
+
+.score-card strong {
+  font-size: 28px;
+}
+
+.score-card span,
+.score-card small {
+  color: var(--muted);
+}
+
+.score-good {
+  border-color: rgba(61, 107, 100, 0.4);
+}
+
+.score-warn {
+  border-color: rgba(185, 111, 77, 0.45);
+}
+
+.score-bad {
+  border-color: rgba(159, 68, 58, 0.48);
+}
+
 .recommendation-main {
   border-radius: 24px;
   padding: 24px;
@@ -445,7 +503,9 @@ th {
 }
 
 .dataset-grid,
-.relationship-grid {
+.relationship-grid,
+.table-map,
+.issue-example-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -465,6 +525,49 @@ th {
   font-family: "Newsreader", Georgia, serif;
   font-size: 28px;
   letter-spacing: -0.04em;
+}
+
+.table-node {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  min-height: 150px;
+  border: 1px solid rgba(47, 95, 143, 0.26);
+  border-radius: 24px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(47, 95, 143, 0.16), transparent 9rem),
+    rgba(255, 250, 239, 0.68);
+}
+
+.table-node::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(47, 95, 143, 0.35);
+  border-radius: 50%;
+}
+
+.table-node strong {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.preview-table {
+  max-height: 340px;
+}
+
+.issue-example-grid pre {
+  overflow: auto;
+  max-height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(23, 32, 29, 0.05);
 }
 
 .issue-legend {
@@ -509,9 +612,12 @@ th {
 @media (max-width: 940px) {
   .hero,
   .recommendation,
+  .executive-grid,
   .chart-grid,
   .dataset-grid,
   .relationship-grid,
+  .table-map,
+  .issue-example-grid,
   .issue-legend {
     grid-template-columns: 1fr;
   }

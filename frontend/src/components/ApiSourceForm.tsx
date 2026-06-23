@@ -9,7 +9,13 @@ function parseJsonObject(text: string, fallback: unknown) {
   return JSON.parse(text);
 }
 
-export function ApiSourceForm({ onReport }: { onReport: (report: ProfileReport) => void }) {
+export function ApiSourceForm({
+  onReport,
+  businessObjective
+}: {
+  onReport: (report: ProfileReport) => void;
+  businessObjective?: string;
+}) {
   const [url, setUrl] = useState("https://jsonplaceholder.typicode.com/posts");
   const [method, setMethod] = useState<"GET" | "POST">("GET");
   const [headers, setHeaders] = useState("{}");
@@ -49,7 +55,8 @@ export function ApiSourceForm({ onReport }: { onReport: (report: ProfileReport) 
         type: paginationType,
         limit: 100,
         max_pages: 3
-      }
+      },
+      business_objective: businessObjective || null
     };
   }
 
@@ -170,4 +177,3 @@ export function ApiSourceForm({ onReport }: { onReport: (report: ProfileReport) 
     </div>
   );
 }
-

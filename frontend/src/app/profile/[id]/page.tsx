@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { AppNav } from "@/components/AppNav";
+import { ActionPlanPanel } from "@/components/ActionPlanPanel";
 import { ChartsPanel } from "@/components/ChartsPanel";
 import { ColumnProfileTable } from "@/components/ColumnProfileTable";
+import { ExecutiveSummaryPanel } from "@/components/ExecutiveSummaryPanel";
 import { MetricsCards } from "@/components/MetricsCards";
 import { MultiDatasetPanel } from "@/components/MultiDatasetPanel";
 import { ProblemsTable } from "@/components/ProblemsTable";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
+import { SmartPreviewPanel } from "@/components/SmartPreviewPanel";
+import { TableMapPanel } from "@/components/TableMapPanel";
 import { getReport } from "@/lib/api";
 import type { ProfileReport } from "@/types/profile";
 
@@ -49,8 +53,12 @@ export default function ProfilePage() {
               Origem: {String(report.source.type ?? "desconhecida")} - criado em {new Date(report.created_at).toLocaleString("pt-BR")}
             </p>
           </section>
+          <ExecutiveSummaryPanel report={report} />
           <MetricsCards report={report} />
           <MultiDatasetPanel report={report} />
+          <TableMapPanel tableMap={report.table_map} />
+          <ActionPlanPanel actions={report.column_actions} />
+          <SmartPreviewPanel preview={report.smart_preview} />
           <RecommendationPanel recommendation={report.recommendation} />
           <ChartsPanel charts={report.charts} />
           <ColumnProfileTable columns={report.schema.columns} />

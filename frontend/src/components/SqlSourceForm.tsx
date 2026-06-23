@@ -4,7 +4,13 @@ import { useState } from "react";
 import { profileSql } from "@/lib/api";
 import type { ProfileReport } from "@/types/profile";
 
-export function SqlSourceForm({ onReport }: { onReport: (report: ProfileReport) => void }) {
+export function SqlSourceForm({
+  onReport,
+  businessObjective
+}: {
+  onReport: (report: ProfileReport) => void;
+  businessObjective?: string;
+}) {
   const [connectionString, setConnectionString] = useState("sqlite:///./examples/example.db");
   const [table, setTable] = useState("customers");
   const [query, setQuery] = useState("");
@@ -21,7 +27,8 @@ export function SqlSourceForm({ onReport }: { onReport: (report: ProfileReport) 
           connection_string: connectionString,
           table: query.trim() ? null : table,
           query: query.trim() || null,
-          limit
+          limit,
+          business_objective: businessObjective || null
         })
       );
     } catch (err) {
