@@ -20,6 +20,8 @@
 
 html {
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 12% 8%, rgba(185, 111, 77, 0.26), transparent 28rem),
     radial-gradient(circle at 88% 12%, rgba(61, 107, 100, 0.25), transparent 30rem),
@@ -29,6 +31,8 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   color: var(--ink);
   font-family: "IBM Plex Mono", "Courier New", monospace;
 }
@@ -62,6 +66,8 @@ a {
   position: relative;
   z-index: 1;
   width: min(1240px, calc(100% - 32px));
+  max-width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding: 32px 0 56px;
 }
@@ -112,10 +118,12 @@ a {
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
   gap: 28px;
   align-items: stretch;
+  min-width: 0;
 }
 
 .hero-copy,
 .panel {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 30px;
   background: var(--panel);
@@ -319,6 +327,8 @@ h3 {
 .dashboard {
   display: grid;
   gap: 18px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .metrics {
@@ -330,6 +340,8 @@ h3 {
 .metric-card,
 .card,
 .chart-card {
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--line);
   border-radius: 24px;
   background: var(--panel);
@@ -360,11 +372,13 @@ h3 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  min-width: 0;
 }
 
 .chart-card {
   min-height: 390px;
   padding: 18px;
+  overflow: hidden;
 }
 
 .chart-card p,
@@ -372,14 +386,29 @@ h3 {
   color: var(--muted);
 }
 
+.chart-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 6px;
+}
+
+.chart-canvas {
+  min-width: 100%;
+}
+
 .table-wrap {
-  overflow: auto;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 18px;
 }
 
 table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   background: rgba(255, 250, 239, 0.54);
 }
@@ -387,9 +416,17 @@ table {
 th,
 td {
   border-bottom: 1px solid var(--line);
+  min-width: 140px;
+  max-width: 420px;
   padding: 12px;
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+th:first-child,
+td:first-child {
+  min-width: 180px;
 }
 
 th {
@@ -412,12 +449,14 @@ th {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
   gap: 18px;
+  min-width: 0;
 }
 
 .executive-grid {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 16px;
+  min-width: 0;
 }
 
 .executive-brief {
@@ -440,6 +479,7 @@ th {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  min-width: 0;
 }
 
 .score-card {
@@ -473,6 +513,7 @@ th {
 }
 
 .recommendation-main {
+  min-width: 0;
   border-radius: 24px;
   padding: 24px;
   background: var(--ink);
@@ -510,11 +551,13 @@ th {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin: 18px 0;
+  min-width: 0;
 }
 
 .dataset-card {
   display: grid;
   gap: 8px;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 16px;
@@ -531,6 +574,7 @@ th {
   position: relative;
   display: grid;
   gap: 7px;
+  min-width: 0;
   min-height: 150px;
   border: 1px solid rgba(47, 95, 143, 0.26);
   border-radius: 24px;
@@ -561,6 +605,11 @@ th {
   max-height: 340px;
 }
 
+.preview-table th,
+.preview-table td {
+  min-width: 160px;
+}
+
 .issue-example-grid pre {
   overflow: auto;
   max-height: 220px;
@@ -574,9 +623,11 @@ th {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  min-width: 0;
 }
 
 .issue-card {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 22px;
   padding: 16px;
@@ -603,6 +654,7 @@ th {
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 22px;
   padding: 18px;
