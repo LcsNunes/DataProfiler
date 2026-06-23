@@ -22,3 +22,16 @@ def test_recommender_handles_no_target():
     assert "supervisionado" in " ".join(recommendation["not_recommended"]).lower()
     assert recommendation["recommended_approach"]
 
+
+def test_recommender_uses_natural_language_objective_signal():
+    recommendation = build_recommendation(
+        source={"type": "file"},
+        summary={"row_count": 10, "column_count": 2, "null_pct": 0, "duplicate_pct": 0},
+        schema={"type_counts": {"numeric": 2}, "columns": [{"name": "a", "null_pct": 0, "possible_sensitive": False}]},
+        quality={"problems": []},
+        statistics={},
+        target={"detected": False},
+        context={"objective_signals": {"mentions_natural_language": True}},
+    )
+
+    assert recommendation["signals"]["natural_language_questions"] is True

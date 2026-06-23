@@ -22,3 +22,7 @@ def test_run_profile_generates_core_sections():
     assert report["recommendation"]["recommended_approach"]
     assert report["charts"]
     assert any(problem.get("explanation") for problem in report["problems"])
+    assert report["executive_summary"]["verdict"]
+    assert report["readiness"]["data_quality_score"] >= 0
+    assert report["column_actions"]
+    assert "sample_rows" in report["smart_preview"]

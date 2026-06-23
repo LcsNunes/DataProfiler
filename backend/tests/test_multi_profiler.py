@@ -32,3 +32,6 @@ def test_run_multi_profile_detects_common_columns_and_saves_report():
     assert report["summary"]["common_column_count"] >= 1
     assert report["relationships"]["common_columns"][0]["column"] == "customer_id"
     assert report["recommendation"]["matched_rules"][0] == "multi_dataset_relationship_analysis"
+    assert report["readiness"]["join_readiness_score"] is not None
+    assert report["table_map"]["nodes"]
+    assert report["table_map"]["edges"]
