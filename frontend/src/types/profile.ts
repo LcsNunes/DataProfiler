@@ -36,8 +36,16 @@ export type ColumnProfile = {
 export type ExecutiveSummary = {
   headline: string;
   verdict: string;
+  decision?: {
+    status: string;
+    title: string;
+    reason: string;
+  };
   top_findings: string[];
   immediate_actions: string[];
+  primary_action?: string;
+  risk_summary?: string;
+  top_problem_types?: string[];
   recommended_approach?: string;
 };
 

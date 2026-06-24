@@ -31,12 +31,17 @@ export function ExecutiveSummaryPanel({ report }: { report: ProfileReport }) {
     { label: "Modelagem", score: readiness.modeling_readiness_score, status: readiness.modeling_readiness_label },
     { label: "Joins", score: readiness.join_readiness_score, status: readiness.join_readiness_label }
   ].filter((item) => item.score !== null && item.score !== undefined);
+  const decision = summary.decision;
 
   return (
     <section className="executive-grid">
       <article className="executive-brief">
         <span className="eyebrow">resumo executivo</span>
         <h2>{buildHeadline(report)}</h2>
+        <div className={`decision-badge ${decision?.status ?? "neutral"}`}>
+          <strong>{decision?.title ?? "Decisão inicial"}</strong>
+          <span>{formatInsightText(decision?.reason ?? summary.verdict)}</span>
+        </div>
         <p>{formatInsightText(summary.verdict)}</p>
         {summary.recommended_approach && <span className="pill">{summary.recommended_approach}</span>}
       </article>
@@ -56,6 +61,16 @@ export function ExecutiveSummaryPanel({ report }: { report: ProfileReport }) {
 
       <article className="card">
         <h3>Achados principais</h3>
+        <div className="executive-mini-grid">
+          <div>
+            <span className="mini-label">Risco principal</span>
+            <strong>{formatInsightText(summary.risk_summary ?? "Validar hipóteses antes de decidir modelo.")}</strong>
+          </div>
+          <div>
+            <span className="mini-label">Próxima ação</span>
+            <strong>{formatInsightText(summary.primary_action ?? summary.immediate_actions[0] ?? "Revisar o diagnóstico.")}</strong>
+          </div>
+        </div>
         <ul className="section-list">
           {summary.top_findings.map((item) => (
             <li key={item}>{formatInsightText(item)}</li>

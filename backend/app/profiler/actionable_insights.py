@@ -281,10 +281,19 @@ def build_executive_summary(
     has_target = target.get("detected")
     objective = context.get("business_objective")
     verdict = "Pode iniciar análise exploratória e preparar um baseline simples."
+    decision_status = "ready_for_baseline"
+    decision_title = "Pode preparar baseline"
+    decision_reason = "A base tem sinais suficientes para uma primeira exploração e baseline controlado."
     if readiness["modeling_readiness_label"] == "not_ready":
         verdict = "Não modele ainda; resolva qualidade, objetivo ou target primeiro."
+        decision_status = "blocked"
+        decision_title = "Não modelar ainda"
+        decision_reason = "A prontidão para modelagem está baixa; valide qualidade, target ou objetivo antes de treinar."
     elif readiness["modeling_readiness_label"] == "needs_review":
         verdict = "Pode explorar, mas valide problemas principais antes de treinar modelo."
+        decision_status = "needs_validation"
+        decision_title = "Explorar antes de modelar"
+        decision_reason = "Há sinais úteis, mas os principais alertas precisam ser tratados ou aceitos conscientemente."
 
     headline = f"{_format_int(summary.get('row_count', 0))} linhas · {_format_int(summary.get('column_count', 0))} colunas"
     if summary.get("dataset_count"):
@@ -306,12 +315,24 @@ def build_executive_summary(
     if quality.get("problems"):
         immediate_actions.append("Tratar os alertas de maior prioridade na tabela de ações por coluna.")
     immediate_actions.extend(recommendation.get("next_steps", [])[:3])
+    risk_summary = (
+        recommendation.get("risks", [None])[0]
+        or "Sem risco crítico específico identificado pelas regras atuais; valide as hipóteses com a área de negócio."
+    )
 
     return {
         "headline": headline,
         "verdict": verdict,
+        "decision": {
+            "status": decision_status,
+            "title": decision_title,
+            "reason": decision_reason,
+        },
         "top_findings": top_findings,
         "immediate_actions": immediate_actions[:6],
+        "primary_action": immediate_actions[0] if immediate_actions else "Revisar resumo e validar objetivo analítico.",
+        "risk_summary": risk_summary,
+        "top_problem_types": [_problem_label(item) for item in top_problem_types],
         "recommended_approach": recommendation.get("recommended_approach"),
     }
 
