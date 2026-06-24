@@ -257,6 +257,86 @@ def _summary(datasets: list[dict[str, Any]], relationships: dict[str, Any]) -> d
     }
 
 
+def _multi_dataset_insights(datasets: list[dict[str, Any]], relationships: dict[str, Any]) -> dict[str, Any]:
+    target_datasets = [
+        dataset for dataset in datasets if dataset.get("target", {}).get("detected")
+    ]
+    suggested_primary = max(target_datasets or datasets, key=lambda item: int(item["summary"].get("row_count", 0)))
+
+    dataset_roles = []
+    for dataset in datasets:
+        rows = int(dataset["summary"].get("row_count", 0))
+        columns = int(dataset["summary"].get("column_count", 0))
+        has_target = bool(dataset.get("target", {}).get("detected"))
+        key_count = sum(
+            1
+            for checks in dataset.get("quality", {}).get("columns", {}).values()
+            if checks.get("possible_primary_key") or checks.get("possible_id")
+        )
+        if dataset["dataset_name"] == suggested_primary["dataset_name"]:
+            role = "primary_candidate"
+            reason = "Possui target detectado ou maior volume de registros para iniciar a análise."
+        elif key_count and rows <= int(suggested_primary["summary"].get("row_count", 0)):
+            role = "dimension_candidate"
+            reason = "Possui possíveis chaves e menor volume, indicando tabela de dimensão ou cadastro."
+        else:
+            role = "fact_or_event_candidate"
+            reason = "Pode representar eventos/fatos ou tabela complementar; valide granularidade antes do join."
+        dataset_roles.append(
+            {
+                "dataset": dataset["dataset_name"],
+                "role": role,
+                "reason": reason,
+                "row_count": rows,
+                "column_count": columns,
+                "has_target": has_target,
+                "candidate_key_count": key_count,
+            }
+        )
+
+    join_plan = []
+    for pair in relationships.get("schema_overlap", [])[:12]:
+        shared_columns = pair.get("shared_columns", [])
+        possible_key_columns = [
+            item["column"]
+            for item in relationships.get("possible_joins", [])
+            if item["column"] in shared_columns
+        ]
+        if possible_key_columns:
+            risk = "medium"
+            advice = "Validar unicidade e cardinalidade antes de executar join."
+        elif shared_columns:
+            risk = "high"
+            advice = "Colunas comuns existem, mas nenhuma parece chave confiável; risco de duplicar linhas."
+        else:
+            risk = "low"
+            advice = "Sem coluna compartilhada detectada; relacionamento não deve ser assumido."
+        join_plan.append(
+            {
+                "left": pair["left"],
+                "right": pair["right"],
+                "shared_columns": shared_columns,
+                "candidate_keys": possible_key_columns,
+                "overlap_pct": pair.get("overlap_pct", 0),
+                "risk": risk,
+                "advice": advice,
+            }
+        )
+
+    warnings = []
+    if not relationships.get("possible_joins"):
+        warnings.append("Nenhuma chave compartilhada confiável foi detectada automaticamente.")
+    if len(datasets) > 1 and not relationships.get("common_columns"):
+        warnings.append("As bases não compartilham nomes de colunas; pode ser necessário mapear chaves manualmente.")
+
+    return {
+        "suggested_primary_dataset": suggested_primary["dataset_name"],
+        "dataset_roles": dataset_roles,
+        "join_plan": join_plan,
+        "warnings": warnings,
+    }
+
+
 def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: str | None = None) -> dict[str, Any]:
     if len(loaded_items) < 2:
         raise ValueError("Multi-dataset profiling requires at least two datasets.")
@@ -274,6 +354,7 @@ def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: st
         datasets.append(dataset)
 
     relationships = _relationships(datasets)
+    multi_dataset_insights = _multi_dataset_insights(datasets, relationships)
     schema = _aggregate_schema(datasets)
     quality = _aggregate_quality(datasets)
     target = _aggregate_target(datasets)
@@ -332,6 +413,7 @@ def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: st
             "recommendation": recommendation,
             "datasets": datasets,
             "relationships": relationships,
+            "multi_dataset_insights": multi_dataset_insights,
             "table_map": table_map,
         }
     )

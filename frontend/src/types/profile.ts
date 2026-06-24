@@ -87,6 +87,29 @@ export type TableMap = {
   edges: Array<{ source: string; target: string; shared_columns: string[]; overlap_pct: number; relationship_hint: string }>;
 };
 
+export type MultiDatasetInsights = {
+  suggested_primary_dataset: string;
+  dataset_roles: Array<{
+    dataset: string;
+    role: string;
+    reason: string;
+    row_count: number;
+    column_count: number;
+    has_target: boolean;
+    candidate_key_count: number;
+  }>;
+  join_plan: Array<{
+    left: string;
+    right: string;
+    shared_columns: string[];
+    candidate_keys: string[];
+    overlap_pct: number;
+    risk: string;
+    advice: string;
+  }>;
+  warnings: string[];
+};
+
 export type Problem = {
   column: string;
   type: string;
@@ -129,6 +152,7 @@ export type ProfileReport = {
   recommendation: Recommendation;
   datasets?: ProfileDataset[];
   relationships?: MultiDatasetRelationships;
+  multi_dataset_insights?: MultiDatasetInsights;
   table_map?: TableMap;
   report_path?: string;
   markdown_path?: string;

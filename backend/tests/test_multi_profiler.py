@@ -35,3 +35,5 @@ def test_run_multi_profile_detects_common_columns_and_saves_report():
     assert report["readiness"]["join_readiness_score"] is not None
     assert report["table_map"]["nodes"]
     assert report["table_map"]["edges"]
+    assert report["multi_dataset_insights"]["suggested_primary_dataset"]
+    assert report["multi_dataset_insights"]["dataset_roles"]

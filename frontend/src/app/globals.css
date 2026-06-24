@@ -805,6 +805,39 @@ th {
   min-width: 0;
 }
 
+.multi-guidance {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.guidance-hero,
+.guidance-list {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 16px;
+  background: rgba(255, 250, 239, 0.62);
+}
+
+.guidance-hero {
+  display: grid;
+  gap: 8px;
+}
+
+.guidance-hero strong {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 34px;
+  letter-spacing: -0.04em;
+}
+
+.guidance-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-content: flex-start;
+}
+
 .dataset-card {
   display: grid;
   gap: 8px;
@@ -921,6 +954,7 @@ th {
   .cleaning-grid,
   .chart-grid,
   .dataset-grid,
+  .multi-guidance,
   .relationship-grid,
   .table-map,
   .issue-example-grid,

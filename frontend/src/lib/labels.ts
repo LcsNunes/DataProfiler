@@ -13,6 +13,8 @@ const CONFIDENCE_LABELS: Record<string, string> = {
 const TECHNICAL_LABELS: Record<string, string> = {
   blank_strings: "Textos em branco",
   boolean: "Booleano",
+  dimension_candidate: "Dimensão/cadastro candidato",
+  fact_or_event_candidate: "Fato/evento candidato",
   categorical: "Categórica",
   constant_column: "Coluna constante",
   date: "Data",
@@ -43,6 +45,7 @@ const TECHNICAL_LABELS: Record<string, string> = {
   possible_join: "Possível join",
   possible_primary_key: "Possível chave primária",
   possible_sensitive_field: "Possível campo sensível",
+  primary_candidate: "Tabela principal candidata",
   sensitive_candidate: "Campo sensível candidato",
   shared_schema: "Schema compartilhado",
   target_candidate: "Target candidato",
