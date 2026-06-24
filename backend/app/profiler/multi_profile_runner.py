@@ -60,6 +60,20 @@ def _aggregate_schema(datasets: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _aggregate_data_dictionary(datasets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for dataset in datasets:
+        dataset_name = dataset["dataset_name"]
+        for item in dataset.get("data_dictionary", []):
+            enriched = dict(item)
+            original_column = item.get("column")
+            enriched["dataset"] = dataset_name
+            enriched["original_column"] = original_column
+            enriched["column"] = f"{dataset_name}.{original_column}"
+            rows.append(enriched)
+    return rows
+
+
 def _aggregate_quality(datasets: list[dict[str, Any]]) -> dict[str, Any]:
     problems: list[dict[str, Any]] = []
     columns: dict[str, Any] = {}
@@ -356,6 +370,7 @@ def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: st
     relationships = _relationships(datasets)
     multi_dataset_insights = _multi_dataset_insights(datasets, relationships)
     schema = _aggregate_schema(datasets)
+    data_dictionary = _aggregate_data_dictionary(datasets)
     quality = _aggregate_quality(datasets)
     target = _aggregate_target(datasets)
     summary = _summary(datasets, relationships)
@@ -402,6 +417,7 @@ def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: st
             "readiness": readiness,
             "column_actions": column_actions,
             "cleaning_plan": cleaning_plan,
+            "data_dictionary": data_dictionary,
             "smart_preview": {"sample_rows": [], "issue_examples": []},
             "summary": summary,
             "schema": schema,

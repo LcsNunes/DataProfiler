@@ -27,4 +27,6 @@ def test_run_profile_generates_core_sections():
     assert report["column_actions"]
     assert report["cleaning_plan"]["checklist"]
     assert "import polars as pl" in report["cleaning_plan"]["polars_script"]
+    assert report["data_dictionary"]
+    assert report["data_dictionary"][0]["role"]
     assert "sample_rows" in report["smart_preview"]

@@ -320,6 +320,59 @@ def build_cleaning_plan(column_actions: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def build_data_dictionary(
+    df: pl.DataFrame | None,
+    schema: dict[str, Any],
+    quality: dict[str, Any],
+    target: dict[str, Any],
+    column_actions: list[dict[str, Any]],
+    limit: int = 120,
+) -> list[dict[str, Any]]:
+    actions_by_column = {action["column"]: action for action in column_actions}
+    target_column = target.get("column")
+    dictionary: list[dict[str, Any]] = []
+
+    for column in schema.get("columns", [])[:limit]:
+        name = column["name"]
+        checks = quality.get("columns", {}).get(name, {})
+        action = actions_by_column.get(name, {})
+        role = action.get("role", "feature_candidate")
+        if name == target_column:
+            role = "target_candidate"
+        elif checks.get("possible_primary_key") or checks.get("possible_id"):
+            role = "join_or_identifier"
+        elif column.get("possible_sensitive"):
+            role = "sensitive_candidate"
+
+        examples: list[Any] = []
+        if df is not None and name in df.columns:
+            examples = [
+                value
+                for value in df[name].drop_nulls().head(5).to_list()
+                if str(value).strip() != ""
+            ][:5]
+
+        dictionary.append(
+            {
+                "column": name,
+                "dataset": column.get("dataset"),
+                "dtype": column.get("dtype"),
+                "semantic_type": column.get("semantic_type"),
+                "role": role,
+                "recommended_action": action.get("recommended_action", "keep"),
+                "null_pct": column.get("null_pct", 0),
+                "unique_count": column.get("unique_count", 0),
+                "unique_rate": column.get("unique_rate", 0),
+                "possible_sensitive": bool(column.get("possible_sensitive")),
+                "problems": column.get("problems", []),
+                "example_values": json_safe(examples),
+                "notes": action.get("strategies", [])[:2],
+            }
+        )
+
+    return dictionary
+
+
 def build_smart_preview(df: pl.DataFrame, quality: dict[str, Any], row_limit: int = 8) -> dict[str, Any]:
     issue_examples: list[dict[str, Any]] = []
 

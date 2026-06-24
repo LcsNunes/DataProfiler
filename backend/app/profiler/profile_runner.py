@@ -9,6 +9,7 @@ from backend.app.profiler.actionable_insights import (
     analysis_context,
     build_cleaning_plan,
     build_column_actions,
+    build_data_dictionary,
     build_executive_summary,
     build_readiness_scores,
     build_smart_preview,
@@ -81,6 +82,7 @@ def build_profile_payload(loaded: DataLoadResult, business_objective: str | None
     readiness = build_readiness_scores(summary, schema, quality, target)
     column_actions = build_column_actions(schema, quality, target)
     cleaning_plan = build_cleaning_plan(column_actions)
+    data_dictionary = build_data_dictionary(loaded.dataframe, schema, quality, target, column_actions)
     smart_preview = build_smart_preview(loaded.dataframe, quality)
     executive_summary = build_executive_summary(
         summary=summary,
@@ -102,6 +104,7 @@ def build_profile_payload(loaded: DataLoadResult, business_objective: str | None
         "readiness": readiness,
         "column_actions": column_actions,
         "cleaning_plan": cleaning_plan,
+        "data_dictionary": data_dictionary,
         "smart_preview": smart_preview,
         "summary": summary,
         "schema": schema,

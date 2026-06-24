@@ -77,6 +77,23 @@ export type CleaningPlan = {
   notes: string[];
 };
 
+export type DataDictionaryEntry = {
+  column: string;
+  dataset?: string | null;
+  original_column?: string | null;
+  dtype: string;
+  semantic_type: string;
+  role: string;
+  recommended_action: string;
+  null_pct: number;
+  unique_count: number;
+  unique_rate: number;
+  possible_sensitive: boolean;
+  problems: string[];
+  example_values: unknown[];
+  notes: string[];
+};
+
 export type SmartPreview = {
   sample_rows: AnyRecord[];
   issue_examples: Array<{ column: string; type: string; examples: AnyRecord[] }>;
@@ -137,6 +154,7 @@ export type ProfileReport = {
   readiness?: Readiness;
   column_actions?: ColumnAction[];
   cleaning_plan?: CleaningPlan;
+  data_dictionary?: DataDictionaryEntry[];
   smart_preview?: SmartPreview;
   summary: AnyRecord;
   schema: {

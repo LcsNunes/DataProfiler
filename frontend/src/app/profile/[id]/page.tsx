@@ -7,6 +7,7 @@ import { ActionPlanPanel } from "@/components/ActionPlanPanel";
 import { ChartsPanel } from "@/components/ChartsPanel";
 import { CleaningPlanPanel } from "@/components/CleaningPlanPanel";
 import { ColumnProfileTable } from "@/components/ColumnProfileTable";
+import { DataDictionaryPanel } from "@/components/DataDictionaryPanel";
 import { ExecutiveSummaryPanel } from "@/components/ExecutiveSummaryPanel";
 import { MetricsCards } from "@/components/MetricsCards";
 import { MultiDatasetPanel } from "@/components/MultiDatasetPanel";
@@ -66,6 +67,7 @@ export default function ProfilePage() {
           <SmartPreviewPanel preview={report.smart_preview} />
           <RecommendationPanel recommendation={report.recommendation} />
           <ChartsPanel charts={report.charts} />
+          <DataDictionaryPanel entries={report.data_dictionary} />
           <ColumnProfileTable columns={report.schema.columns} />
           <ProblemsTable problems={report.problems} />
         </div>
