@@ -34,6 +34,39 @@ def _score_label(score: int) -> str:
     return "not_ready"
 
 
+def _score_label_pt(label: str | None) -> str:
+    return {
+        "ready": "pronto",
+        "needs_review": "requer revisão",
+        "not_ready": "não pronto",
+    }.get(label or "", label or "não avaliado")
+
+
+def _format_int(value: Any) -> str:
+    try:
+        return f"{int(value):,}".replace(",", ".")
+    except (TypeError, ValueError):
+        return "0"
+
+
+def _problem_label(problem_type: str) -> str:
+    return {
+        "missing_values": "valores ausentes",
+        "empty_strings": "strings vazias",
+        "whitespace_only_strings": "strings só com espaços",
+        "constant_column": "colunas constantes",
+        "near_constant_column": "colunas quase constantes",
+        "high_cardinality": "alta cardinalidade",
+        "possible_id": "possível identificador",
+        "possible_primary_key": "possível chave primária",
+        "invalid_dates": "datas inválidas",
+        "inconsistent_values": "valores inconsistentes",
+        "numeric_outliers": "outliers numéricos",
+        "mixed_types": "mistura de tipos",
+        "possible_encoding_issue": "possível problema de encoding",
+    }.get(problem_type, problem_type.replace("_", " "))
+
+
 def _top_problem_types(problems: list[dict[str, Any]], limit: int = 3) -> list[str]:
     counts: dict[str, int] = {}
     for problem in problems:
@@ -121,54 +154,54 @@ def build_column_actions(
         if name == target_column:
             recommended_action = "validate_target"
             role = "target_candidate"
-            reasons.append("Possible target column detected.")
-            strategies.append("Confirm this target with the business owner before supervised modeling.")
+            reasons.append("Possível coluna target detectada.")
+            strategies.append("Confirme esse target com a área de negócio antes de modelagem supervisionada.")
         elif checks.get("possible_primary_key") or checks.get("possible_id"):
             recommended_action = "use_as_key"
             role = "join_or_identifier"
-            reasons.append("Column looks like an identifier or key.")
-            strategies.append("Use for joins, deduplication or lineage; avoid direct predictive use.")
+            reasons.append("A coluna parece ser identificador ou chave.")
+            strategies.append("Use para joins, deduplicação ou rastreabilidade; evite uso preditivo direto.")
         elif checks.get("constant"):
             recommended_action = "drop_from_modeling"
-            reasons.append("Column is constant.")
-            strategies.append("Remove from modeling unless it is useful metadata.")
+            reasons.append("A coluna é constante.")
+            strategies.append("Remova da modelagem, exceto se for metadado útil.")
         elif column.get("possible_sensitive"):
             recommended_action = "mask_or_exclude"
             role = "sensitive_candidate"
-            reasons.append("Column may contain sensitive data.")
-            strategies.append("Mask, hash or remove before external sharing or modeling.")
+            reasons.append("A coluna pode conter dados sensíveis.")
+            strategies.append("Mascare, aplique hash ou remova antes de compartilhamento externo ou modelagem.")
 
         if checks.get("null_count"):
-            reasons.append(f"{checks.get('null_pct', 0)}% missing values.")
-            strategies.append("Decide between imputation, null flag, row filtering or source correction.")
+            reasons.append(f"{checks.get('null_pct', 0)}% de valores ausentes.")
+            strategies.append("Decida entre imputação, flag de nulo, filtro de linhas ou correção na origem.")
             if recommended_action == "keep":
                 recommended_action = "treat_missing_values"
         if checks.get("high_cardinality"):
-            reasons.append("High cardinality detected.")
-            strategies.append("Avoid blind one-hot encoding; consider grouping, hashing or target encoding.")
+            reasons.append("Alta cardinalidade detectada.")
+            strategies.append("Evite one-hot encoding cego; considere agrupamento, hashing ou target encoding.")
             if recommended_action == "keep":
                 recommended_action = "validate_cardinality"
         if checks.get("outliers"):
-            reasons.append("Numeric outliers detected.")
-            strategies.append("Inspect extremes; consider robust models, log transform, winsorization or outlier flag.")
+            reasons.append("Outliers numéricos detectados.")
+            strategies.append("Inspecione extremos; considere modelos robustos, transformação log, winsorização ou flag de outlier.")
         if checks.get("mixed_types"):
-            reasons.append("Mixed value types detected.")
-            strategies.append("Define the official type and correct values outside the expected type.")
+            reasons.append("Mistura de tipos detectada.")
+            strategies.append("Defina o tipo oficial e corrija valores fora do tipo esperado.")
             if recommended_action == "keep":
                 recommended_action = "fix_type_consistency"
         if checks.get("invalid_dates"):
-            reasons.append("Invalid dates detected.")
-            strategies.append("Standardize date format before temporal features or time splits.")
+            reasons.append("Datas inválidas detectadas.")
+            strategies.append("Padronize o formato antes de criar features temporais ou cortes treino/teste por tempo.")
             if recommended_action == "keep":
                 recommended_action = "fix_dates"
 
         semantic_type = column.get("semantic_type")
         if semantic_type == "categorical" and recommended_action == "keep":
-            strategies.append("Encode categoricals with method based on cardinality and model choice.")
+            strategies.append("Codifique categóricas com método definido pela cardinalidade e pelo modelo escolhido.")
         if semantic_type in {"text", "long_text"} and recommended_action == "keep":
-            strategies.append("Consider text cleanup, embeddings or TF-IDF depending on the objective.")
+            strategies.append("Considere limpeza textual, embeddings ou TF-IDF conforme o objetivo.")
         if semantic_type == "date" and recommended_action == "keep":
-            strategies.append("Create date-derived features such as month, recency and elapsed time.")
+            strategies.append("Crie features derivadas de data, como mês, recência e tempo decorrido.")
 
         actions.append(
             {
@@ -177,8 +210,8 @@ def build_column_actions(
                 "recommended_action": recommended_action,
                 "role": role,
                 "priority": "high" if recommended_action not in {"keep"} else "normal",
-                "reasons": reasons or ["No major issue detected for this column."],
-                "strategies": strategies or ["Keep as candidate feature and validate with the modeling objective."],
+                "reasons": reasons or ["Nenhum problema relevante detectado nesta coluna."],
+                "strategies": strategies or ["Mantenha como feature candidata e valide com o objetivo da modelagem."],
             }
         )
 
@@ -247,23 +280,23 @@ def build_executive_summary(
     top_problem_types = readiness["drivers"].get("top_problem_types", [])
     has_target = target.get("detected")
     objective = context.get("business_objective")
-    verdict = "Pode iniciar EDA e preparar baseline simples."
+    verdict = "Pode iniciar análise exploratória e preparar um baseline simples."
     if readiness["modeling_readiness_label"] == "not_ready":
-        verdict = "Nao modele ainda; resolva qualidade, objetivo ou target primeiro."
+        verdict = "Não modele ainda; resolva qualidade, objetivo ou target primeiro."
     elif readiness["modeling_readiness_label"] == "needs_review":
         verdict = "Pode explorar, mas valide problemas principais antes de treinar modelo."
 
-    headline = f"{summary.get('row_count', 0)} linhas, {summary.get('column_count', 0)} colunas"
+    headline = f"{_format_int(summary.get('row_count', 0))} linhas · {_format_int(summary.get('column_count', 0))} colunas"
     if summary.get("dataset_count"):
-        headline = f"{summary.get('dataset_count')} bases, {summary.get('row_count', 0)} linhas totais"
+        headline = f"{_format_int(summary.get('dataset_count'))} bases · {_format_int(summary.get('row_count', 0))} linhas totais"
 
     top_findings = [
-        f"Qualidade dos dados: {readiness['data_quality_score']}/100 ({readiness['data_quality_label']}).",
-        f"Prontidao para modelagem: {readiness['modeling_readiness_score']}/100 ({readiness['modeling_readiness_label']}).",
-        f"Target provavel: {target.get('column') if has_target else 'nao detectado'}.",
+        f"Qualidade dos dados: {readiness['data_quality_score']}/100 ({_score_label_pt(readiness['data_quality_label'])}).",
+        f"Prontidão para modelagem: {readiness['modeling_readiness_score']}/100 ({_score_label_pt(readiness['modeling_readiness_label'])}).",
+        f"Target provável: {target.get('column') if has_target else 'não detectado'}.",
     ]
     if top_problem_types:
-        top_findings.append("Problemas mais frequentes: " + ", ".join(top_problem_types) + ".")
+        top_findings.append("Problemas mais frequentes: " + ", ".join(_problem_label(item) for item in top_problem_types) + ".")
     if objective:
         top_findings.append(f"Objetivo informado: {objective}.")
 
@@ -271,7 +304,7 @@ def build_executive_summary(
     if not has_target:
         immediate_actions.append("Definir ou confirmar objetivo/target antes de modelagem supervisionada.")
     if quality.get("problems"):
-        immediate_actions.append("Tratar os alertas de maior prioridade na tabela de acoes por coluna.")
+        immediate_actions.append("Tratar os alertas de maior prioridade na tabela de ações por coluna.")
     immediate_actions.extend(recommendation.get("next_steps", [])[:3])
 
     return {

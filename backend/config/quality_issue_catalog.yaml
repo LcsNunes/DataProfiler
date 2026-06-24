@@ -2,68 +2,68 @@ version: 1
 issues:
   missing_values:
     title: "Valores ausentes"
-    meaning: "A coluna possui celulas nulas ou sem valor informado."
-    why_it_matters: "Nulos podem enviesar estatisticas, reduzir volume util e quebrar modelos que nao aceitam valores ausentes."
+    meaning: "A coluna possui células nulas ou sem valor informado."
+    why_it_matters: "Nulos podem enviesar estatísticas, reduzir volume útil e quebrar modelos que não aceitam valores ausentes."
     cautions:
-      - "Nao preencher automaticamente sem entender se o nulo tem significado de negocio."
-      - "Verifique se o nulo ocorre por erro de coleta, regra operacional ou ausencia legitima."
+      - "Não preencher automaticamente sem entender se o nulo tem significado de negócio."
+      - "Verifique se o nulo ocorre por erro de coleta, regra operacional ou ausência legítima."
     strategies:
       - "Medir o percentual de nulos por coluna e por segmento."
       - "Imputar com mediana/moda/modelo quando fizer sentido."
-      - "Criar flag indicando valor ausente se a ausencia for informativa."
-      - "Remover coluna ou linhas apenas quando o impacto for aceitavel."
+      - "Criar flag indicando valor ausente se a ausência for informativa."
+      - "Remover coluna ou linhas apenas quando o impacto for aceitável."
 
   empty_strings:
     title: "Strings vazias"
     meaning: "A coluna possui textos vazios, como ''."
-    why_it_matters: "Strings vazias frequentemente representam nulos disfarçados e podem ser tratadas como categoria valida por engano."
+    why_it_matters: "Strings vazias frequentemente representam nulos disfarçados e podem ser tratadas como categoria válida por engano."
     cautions:
-      - "Padronize strings vazias como nulo antes de estatisticas e modelagem."
+      - "Padronize strings vazias como nulo antes de estatísticas e modelagem."
     strategies:
       - "Converter strings vazias para null."
       - "Investigar origem do preenchimento vazio."
-      - "Aplicar regras de obrigatoriedade para campos criticos."
+      - "Aplicar regras de obrigatoriedade para campos críticos."
 
   whitespace_only_strings:
-    title: "Strings apenas com espacos"
-    meaning: "A coluna possui valores preenchidos somente com espacos, tabs ou quebras de linha."
-    why_it_matters: "Esses valores parecem preenchidos para alguns sistemas, mas semanticamente estao vazios."
+    title: "Strings apenas com espaços"
+    meaning: "A coluna possui valores preenchidos somente com espaços, tabs ou quebras de linha."
+    why_it_matters: "Esses valores parecem preenchidos para alguns sistemas, mas semanticamente estão vazios."
     cautions:
-      - "Faca trim antes de comparar categorias ou calcular cardinalidade."
+      - "Faça trim antes de comparar categorias ou calcular cardinalidade."
     strategies:
       - "Aplicar trim em colunas textuais."
       - "Converter resultado vazio para null."
-      - "Adicionar validacao no ponto de entrada dos dados."
+      - "Adicionar validação no ponto de entrada dos dados."
 
   constant_column:
     title: "Coluna constante"
     meaning: "A coluna tem apenas um valor distinto."
-    why_it_matters: "Nao adiciona informacao para analise ou modelos preditivos e pode indicar campo tecnico inutil."
+    why_it_matters: "Não adiciona informação para análise ou modelos preditivos e pode indicar campo técnico inútil."
     cautions:
-      - "Confirme se a coluna nao representa filtro aplicado na extracao, como pais ou unidade fixa."
+      - "Confirme se a coluna não representa filtro aplicado na extração, como país ou unidade fixa."
     strategies:
       - "Remover da modelagem."
       - "Manter apenas como metadado se tiver valor operacional."
-      - "Revisar extracao caso a coluna deveria variar."
+      - "Revisar extração caso a coluna deveria variar."
 
   near_constant_column:
     title: "Coluna quase constante"
-    meaning: "Um unico valor domina quase todos os registros."
-    why_it_matters: "Pode ter pouco poder preditivo e dificultar validacao, mas valores raros podem ser importantes."
+    meaning: "Um único valor domina quase todos os registros."
+    why_it_matters: "Pode ter pouco poder preditivo e dificultar validação, mas valores raros podem ser importantes."
     cautions:
-      - "Nao descarte automaticamente se a classe rara representar risco, fraude ou evento critico."
+      - "Não descarte automaticamente se a classe rara representar risco, fraude ou evento crítico."
     strategies:
-      - "Avaliar distribuicao por target."
+      - "Avaliar distribuição por target."
       - "Agrupar valores raros quando fizer sentido."
-      - "Remover da modelagem se nao houver relacao com o objetivo."
+      - "Remover da modelagem se não houver relação com o objetivo."
 
   high_cardinality:
     title: "Alta cardinalidade"
-    meaning: "A coluna possui muitos valores distintos em relacao ao numero de linhas."
+    meaning: "A coluna possui muitos valores distintos em relação ao número de linhas."
     why_it_matters: "Pode indicar ID, texto livre ou categoria muito granular. One-hot encoding pode gerar muitas colunas e overfitting."
     cautions:
-      - "Nao aplicar one-hot encoding cegamente."
-      - "Valide se a coluna e identificador, chave ou feature de negocio."
+      - "Não aplicar one-hot encoding cegamente."
+      - "Valide se a coluna é identificador, chave ou feature de negócio."
     strategies:
       - "Remover se for ID puro."
       - "Usar hashing, target encoding ou agrupamento de categorias raras."
@@ -71,78 +71,78 @@ issues:
       - "Usar modelos que lidam melhor com categóricas, como CatBoost, quando apropriado."
 
   possible_id:
-    title: "Possivel identificador"
-    meaning: "A coluna parece identificar registros ou entidades por nome, unicidade ou padrao."
-    why_it_matters: "IDs raramente sao boas features diretas, mas sao essenciais para joins, deduplicacao e rastreabilidade."
+    title: "Possível identificador"
+    meaning: "A coluna parece identificar registros ou entidades por nome, unicidade ou padrão."
+    why_it_matters: "IDs raramente são boas features diretas, mas são essenciais para joins, deduplicação e rastreabilidade."
     cautions:
-      - "Usar ID como feature pode causar memorizacao e vazamento."
+      - "Usar ID como feature pode causar memorização e vazamento."
     strategies:
       - "Usar para relacionar tabelas."
       - "Remover da modelagem direta."
-      - "Criar features agregadas por ID se houver historico ou eventos."
+      - "Criar features agregadas por ID se houver histórico ou eventos."
 
   possible_primary_key:
-    title: "Possivel chave primaria"
-    meaning: "A coluna nao tem nulos e parece unica por linha."
+    title: "Possível chave primária"
+    meaning: "A coluna não tem nulos e parece única por linha."
     why_it_matters: "Pode ser a chave principal da tabela e ajudar a entender granularidade."
     cautions:
-      - "Unicidade na amostra nao garante unicidade na base completa."
+      - "Unicidade na amostra não garante unicidade na base completa."
     strategies:
       - "Validar unicidade na fonte original."
       - "Usar como chave de join ou auditoria."
       - "Evitar usar diretamente como feature preditiva."
 
   invalid_dates:
-    title: "Datas invalidas"
-    meaning: "A coluna parece representar data, mas parte dos valores nao foi parseada como data valida."
-    why_it_matters: "Datas invalidas quebram ordenacao temporal, janelas de treino/teste e features de tempo."
+    title: "Datas inválidas"
+    meaning: "A coluna parece representar data, mas parte dos valores não foi parseada como data válida."
+    why_it_matters: "Datas inválidas quebram ordenação temporal, janelas de treino/teste e features de tempo."
     cautions:
-      - "Mistura de formatos pode gerar parse incorreto, nao apenas nulo."
+      - "Mistura de formatos pode gerar parse incorreto, não apenas nulo."
     strategies:
-      - "Padronizar formato de data na ingestao."
-      - "Separar valores invalidos para correcao ou auditoria."
-      - "Criar features temporais somente apos validacao."
+      - "Padronizar formato de data na ingestão."
+      - "Separar valores inválidos para correção ou auditoria."
+      - "Criar features temporais somente após validação."
 
   inconsistent_values:
     title: "Valores inconsistentes"
-    meaning: "A coluna tem valores que parecem equivalentes apos normalizacao simples, como diferencas de caixa ou espacos."
-    why_it_matters: "Categorias duplicadas artificialmente distorcem frequencias, cardinalidade e modelos."
+    meaning: "A coluna tem valores que parecem equivalentes após normalização simples, como diferenças de caixa ou espaços."
+    why_it_matters: "Categorias duplicadas artificialmente distorcem frequências, cardinalidade e modelos."
     cautions:
-      - "Normalizacao agressiva pode juntar categorias que deveriam ser distintas."
+      - "Normalização agressiva pode juntar categorias que deveriam ser distintas."
     strategies:
-      - "Aplicar trim e padronizacao de caixa."
-      - "Criar dicionario de categorias validas."
-      - "Mapear sinonimos e grafias conhecidas."
+      - "Aplicar trim e padronização de caixa."
+      - "Criar dicionário de categorias válidas."
+      - "Mapear sinônimos e grafias conhecidas."
 
   numeric_outliers:
-    title: "Outliers numericos"
+    title: "Outliers numéricos"
     meaning: "A coluna possui valores muito distantes do intervalo esperado pela regra IQR."
-    why_it_matters: "Outliers podem representar erro, fraude, evento raro ou cauda natural da distribuicao."
+    why_it_matters: "Outliers podem representar erro, fraude, evento raro ou cauda natural da distribuição."
     cautions:
-      - "Nao remover outliers automaticamente sem validacao de negocio."
+      - "Não remover outliers automaticamente sem validação de negócio."
       - "Em risco/fraude, outliers podem ser justamente os casos mais importantes."
     strategies:
       - "Inspecionar amostras extremas."
-      - "Aplicar winsorization, transformacao log ou modelos robustos quando apropriado."
+      - "Aplicar winsorization, transformação log ou modelos robustos quando apropriado."
       - "Criar flag de outlier se o evento for informativo."
 
   mixed_types:
     title: "Mistura de tipos"
-    meaning: "A coluna textual contem valores que parecem pertencer a tipos diferentes, como numeros, datas, booleanos e texto."
-    why_it_matters: "Mistura de tipos dificulta parse, estatisticas confiaveis e modelagem consistente."
+    meaning: "A coluna textual contém valores que parecem pertencer a tipos diferentes, como números, datas, booleanos e texto."
+    why_it_matters: "Mistura de tipos dificulta parse, estatísticas confiáveis e modelagem consistente."
     cautions:
       - "Pode indicar erro de carga, coluna reaproveitada ou valores especiais como 'N/A'."
     strategies:
       - "Definir tipo oficial da coluna."
       - "Separar ou corrigir valores fora do tipo esperado."
-      - "Padronizar codigos especiais antes da analise."
+      - "Padronizar códigos especiais antes da análise."
 
   possible_encoding_issue:
-    title: "Possivel problema de encoding"
-    meaning: "Foram encontrados caracteres de substituicao ou sinais de texto decodificado incorretamente."
+    title: "Possível problema de encoding"
+    meaning: "Foram encontrados caracteres de substituição ou sinais de texto decodificado incorretamente."
     why_it_matters: "Encoding errado corrompe categorias, nomes, textos e pode criar valores duplicados artificiais."
     cautions:
-      - "Recarregar o arquivo com encoding correto antes de tomar decisoes sobre texto."
+      - "Recarregar o arquivo com encoding correto antes de tomar decisões sobre texto."
     strategies:
       - "Testar encodings comuns como UTF-8, UTF-8-SIG, Latin-1 e Windows-1252."
       - "Validar acentos e caracteres especiais em amostras."
