@@ -272,6 +272,63 @@ h3 {
   resize: vertical;
 }
 
+.objective-panel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(61, 107, 100, 0.22);
+  border-radius: 24px;
+  margin-bottom: 18px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(61, 107, 100, 0.12), transparent 10rem),
+    rgba(255, 250, 239, 0.54);
+}
+
+.objective-panel h3 {
+  margin-top: 12px;
+  font-size: 30px;
+}
+
+.objective-panel p,
+.objective-panel small {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.objective-panel textarea {
+  width: 100%;
+  min-height: 92px;
+  border: 1px solid rgba(23, 32, 29, 0.2);
+  border-radius: 16px;
+  padding: 13px 14px;
+  outline: none;
+  resize: vertical;
+  background: rgba(255, 250, 239, 0.78);
+  color: var(--ink);
+}
+
+.preset-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-chip {
+  cursor: pointer;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: var(--muted);
+  background: rgba(255, 250, 239, 0.72);
+}
+
+.preset-chip.active,
+.preset-chip:hover {
+  border-color: var(--sage);
+  color: var(--paper);
+  background: var(--sage);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

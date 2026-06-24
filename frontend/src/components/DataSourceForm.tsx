@@ -9,6 +9,15 @@ import type { ProfileReport } from "@/types/profile";
 
 type Tab = "upload" | "path" | "api" | "sql";
 
+const OBJECTIVE_PRESETS = [
+  "Validar qualidade dos dados",
+  "Prever churn",
+  "Detectar fraude ou risco",
+  "Explorar várias tabelas",
+  "Responder perguntas sobre dados",
+  "Preparar baseline de modelo"
+];
+
 export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport) => void }) {
   const [tab, setTab] = useState<Tab>("upload");
   const [files, setFiles] = useState<File[]>([]);
@@ -48,13 +57,34 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
         ))}
       </div>
 
-      <div className="field objective-field">
-        <label>Objetivo da análise (opcional)</label>
+      <div className="objective-panel">
+        <div>
+          <span className="eyebrow">contexto determinístico</span>
+          <h3>Objetivo da análise</h3>
+          <p className="muted">
+            Este campo não é chat e não chama LLM. Ele só ajusta regras determinísticas para priorizar alertas,
+            recomendações e próximos passos.
+          </p>
+        </div>
+        <div className="preset-strip">
+          {OBJECTIVE_PRESETS.map((preset) => (
+            <button
+              className={`preset-chip ${businessObjective === preset ? "active" : ""}`}
+              key={preset}
+              type="button"
+              onClick={() => setBusinessObjective(preset)}
+            >
+              {preset}
+            </button>
+          ))}
+        </div>
         <textarea
+          aria-label="Objetivo da análise"
           value={businessObjective}
           onChange={(event) => setBusinessObjective(event.target.value)}
           placeholder="Ex: entender churn, validar qualidade, responder perguntas em linguagem natural, detectar fraude"
         />
+        <small className="muted">Opcional. Se ficar vazio, a análise segue apenas pelos sinais detectados na base.</small>
       </div>
 
       {tab === "upload" && (
