@@ -95,24 +95,36 @@ def build_readiness_scores(
     data_quality = max(0, round(100 - null_penalty - duplicate_penalty - problem_penalty - sensitive_penalty))
 
     modeling = data_quality
+    target_impact = 12 if target.get("detected") else -25
     if target.get("detected"):
         modeling += 12
     else:
         modeling -= 25
+    imbalance_penalty = 10 if target.get("imbalanced") else 0
     if target.get("imbalanced"):
         modeling -= 10
-    modeling -= min(high_cardinality * 2, 10)
+    cardinality_penalty = min(high_cardinality * 2, 10)
+    modeling -= cardinality_penalty
     modeling = max(0, min(100, round(modeling)))
 
     join_readiness: int | None = None
+    join_explanation: list[dict[str, Any]] = []
     if relationships is not None:
         join_readiness = 35
+        join_explanation.append({"label": "Base inicial para análise multi-base", "impact": 35})
         if relationships.get("common_columns"):
             join_readiness += 25
+            join_explanation.append({"label": "Existem colunas compartilhadas entre bases", "impact": 25})
+        else:
+            join_explanation.append({"label": "Nenhuma coluna compartilhada detectada", "impact": 0})
         if relationships.get("possible_joins"):
             join_readiness += 25
+            join_explanation.append({"label": "Foram encontradas chaves candidatas para join", "impact": 25})
+        else:
+            join_explanation.append({"label": "Nenhuma chave candidata confiável foi detectada", "impact": 0})
         if relationships.get("compatible_schema_groups"):
             join_readiness += 10
+            join_explanation.append({"label": "Há grupos com schemas compatíveis", "impact": 10})
         join_readiness = min(100, join_readiness)
 
     return {
@@ -122,6 +134,25 @@ def build_readiness_scores(
         "modeling_readiness_label": _score_label(modeling),
         "join_readiness_score": join_readiness,
         "join_readiness_label": _score_label(join_readiness) if join_readiness is not None else None,
+        "score_explanations": {
+            "data_quality": [
+                {"label": "Base inicial", "impact": 100},
+                {"label": f"Nulos na base ({summary.get('null_pct', 0)}%)", "impact": -round(null_penalty, 1)},
+                {"label": f"Linhas duplicadas ({summary.get('duplicate_pct', 0)}%)", "impact": -round(duplicate_penalty, 1)},
+                {"label": f"Alertas de qualidade ({len(problems)})", "impact": -round(problem_penalty, 1)},
+                {"label": f"Campos sensíveis candidatos ({sensitive})", "impact": -round(sensitive_penalty, 1)},
+            ],
+            "modeling": [
+                {"label": "Score de qualidade dos dados", "impact": data_quality},
+                {
+                    "label": "Target detectado" if target.get("detected") else "Target não detectado",
+                    "impact": target_impact,
+                },
+                {"label": "Target desbalanceado", "impact": -imbalance_penalty},
+                {"label": f"Alta cardinalidade em {high_cardinality} coluna(s)", "impact": -cardinality_penalty},
+            ],
+            "joins": join_explanation,
+        },
         "drivers": {
             "warning_count": warning_count,
             "problem_count": len(problems),

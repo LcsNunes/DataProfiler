@@ -11,6 +11,7 @@ import { MetricsCards } from "@/components/MetricsCards";
 import { MultiDatasetPanel } from "@/components/MultiDatasetPanel";
 import { ProblemsTable } from "@/components/ProblemsTable";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
+import { ScoreExplanationPanel } from "@/components/ScoreExplanationPanel";
 import { SmartPreviewPanel } from "@/components/SmartPreviewPanel";
 import { TableMapPanel } from "@/components/TableMapPanel";
 import { getReport } from "@/lib/api";
@@ -55,6 +56,7 @@ export default function ProfilePage() {
             </p>
           </section>
           <ExecutiveSummaryPanel report={report} />
+          <ScoreExplanationPanel readiness={report.readiness} />
           <MetricsCards report={report} />
           <MultiDatasetPanel report={report} />
           <TableMapPanel tableMap={report.table_map} />

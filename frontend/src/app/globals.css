@@ -626,6 +626,49 @@ th {
   color: var(--muted);
 }
 
+.score-explanation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.score-explanation-card {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(255, 250, 239, 0.62);
+}
+
+.score-explanation-card h3 {
+  font-size: 24px;
+}
+
+.score-explanation-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.score-explanation-card li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.positive-impact {
+  color: var(--sage);
+}
+
+.negative-impact {
+  color: var(--danger);
+}
+
 .score-good {
   border-color: rgba(61, 107, 100, 0.4);
 }
@@ -820,6 +863,7 @@ th {
   .recommendation,
   .executive-grid,
   .executive-mini-grid,
+  .score-explanation-grid,
   .chart-grid,
   .dataset-grid,
   .relationship-grid,

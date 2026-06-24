@@ -56,6 +56,7 @@ export type Readiness = {
   modeling_readiness_label: string;
   join_readiness_score?: number | null;
   join_readiness_label?: string | null;
+  score_explanations?: Record<string, Array<{ label: string; impact: number }>>;
   drivers: AnyRecord;
 };
 
