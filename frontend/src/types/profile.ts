@@ -70,6 +70,13 @@ export type ColumnAction = {
   strategies: string[];
 };
 
+export type CleaningPlan = {
+  checklist: string[];
+  high_priority_actions: ColumnAction[];
+  polars_script: string;
+  notes: string[];
+};
+
 export type SmartPreview = {
   sample_rows: AnyRecord[];
   issue_examples: Array<{ column: string; type: string; examples: AnyRecord[] }>;
@@ -106,6 +113,7 @@ export type ProfileReport = {
   executive_summary?: ExecutiveSummary;
   readiness?: Readiness;
   column_actions?: ColumnAction[];
+  cleaning_plan?: CleaningPlan;
   smart_preview?: SmartPreview;
   summary: AnyRecord;
   schema: {
@@ -124,6 +132,8 @@ export type ProfileReport = {
   table_map?: TableMap;
   report_path?: string;
   markdown_path?: string;
+  cleaning_plan_path?: string;
+  cleaning_script_path?: string;
 };
 
 export type ProfileDataset = Omit<ProfileReport, "datasets" | "relationships"> & {

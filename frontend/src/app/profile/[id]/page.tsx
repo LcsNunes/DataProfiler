@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { AppNav } from "@/components/AppNav";
 import { ActionPlanPanel } from "@/components/ActionPlanPanel";
 import { ChartsPanel } from "@/components/ChartsPanel";
+import { CleaningPlanPanel } from "@/components/CleaningPlanPanel";
 import { ColumnProfileTable } from "@/components/ColumnProfileTable";
 import { ExecutiveSummaryPanel } from "@/components/ExecutiveSummaryPanel";
 import { MetricsCards } from "@/components/MetricsCards";
@@ -61,6 +62,7 @@ export default function ProfilePage() {
           <MultiDatasetPanel report={report} />
           <TableMapPanel tableMap={report.table_map} />
           <ActionPlanPanel actions={report.column_actions} />
+          <CleaningPlanPanel report={report} />
           <SmartPreviewPanel preview={report.smart_preview} />
           <RecommendationPanel recommendation={report.recommendation} />
           <ChartsPanel charts={report.charts} />

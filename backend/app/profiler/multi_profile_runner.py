@@ -9,6 +9,7 @@ from backend.app.core.security import sanitize_for_output
 from backend.app.loaders.base import DataLoadResult
 from backend.app.profiler.actionable_insights import (
     analysis_context,
+    build_cleaning_plan,
     build_column_actions,
     build_executive_summary,
     build_readiness_scores,
@@ -297,6 +298,7 @@ def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: st
     )
     readiness = build_readiness_scores(summary, schema, quality, target, relationships)
     column_actions = build_column_actions(schema, quality, target, limit=120)
+    cleaning_plan = build_cleaning_plan(column_actions)
     table_map = build_table_map(datasets, relationships)
     executive_summary = build_executive_summary(
         summary=summary,
@@ -318,6 +320,7 @@ def run_multi_profile(loaded_items: list[DataLoadResult], business_objective: st
             "executive_summary": executive_summary,
             "readiness": readiness,
             "column_actions": column_actions,
+            "cleaning_plan": cleaning_plan,
             "smart_preview": {"sample_rows": [], "issue_examples": []},
             "summary": summary,
             "schema": schema,

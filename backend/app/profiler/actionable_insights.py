@@ -250,6 +250,76 @@ def build_column_actions(
     return actions
 
 
+def build_cleaning_plan(column_actions: list[dict[str, Any]]) -> dict[str, Any]:
+    high_priority = [action for action in column_actions if action.get("priority") == "high"]
+    missing_columns = [action["column"] for action in column_actions if action.get("recommended_action") == "treat_missing_values"]
+    drop_columns = [action["column"] for action in column_actions if action.get("recommended_action") == "drop_from_modeling"]
+    key_columns = [action["column"] for action in column_actions if action.get("recommended_action") == "use_as_key"]
+    sensitive_columns = [action["column"] for action in column_actions if action.get("recommended_action") == "mask_or_exclude"]
+
+    checklist = [
+        "Criar cópia da base original antes de qualquer transformação.",
+        "Converter strings vazias e espaços em branco para nulo.",
+        "Validar target e remover identificadores da lista de features diretas.",
+    ]
+    if missing_columns:
+        checklist.append(f"Definir estratégia de nulos para {len(missing_columns)} coluna(s).")
+    if drop_columns:
+        checklist.append(f"Remover ou justificar {len(drop_columns)} coluna(s) constante(s) ou sem valor analítico.")
+    if sensitive_columns:
+        checklist.append(f"Mascarar, hashear ou excluir {len(sensitive_columns)} campo(s) sensível(is).")
+    if key_columns:
+        checklist.append(f"Separar {len(key_columns)} chave(s)/ID(s) para joins, auditoria ou deduplicação.")
+
+    polars_lines = [
+        "import polars as pl",
+        "",
+        "# Substitua pelo carregamento real da sua base.",
+        "# df = pl.read_csv('sua_base.csv')",
+        "",
+        "# 1) Padronizar textos vazios como nulos.",
+        "text_columns = [column for column, dtype in df.schema.items() if dtype == pl.Utf8]",
+        "df = df.with_columns([",
+        "    pl.when(pl.col(column).str.strip_chars() == '')",
+        "    .then(None)",
+        "    .otherwise(pl.col(column))",
+        "    .alias(column)",
+        "    for column in text_columns",
+        "])",
+    ]
+    if drop_columns:
+        polars_lines.extend(["", "# 2) Remover colunas sem utilidade analítica clara.", f"df = df.drop({drop_columns!r}, strict=False)"])
+    if sensitive_columns:
+        polars_lines.extend(
+            [
+                "",
+                "# 3) Remover ou mascarar campos sensíveis antes de compartilhar/modelar.",
+                f"sensitive_columns = {sensitive_columns!r}",
+                "df_model = df.drop(sensitive_columns, strict=False)",
+            ]
+        )
+    if missing_columns:
+        polars_lines.extend(
+            [
+                "",
+                "# 4) Exemplo conservador: criar flags de nulo para colunas com valores ausentes.",
+                f"missing_columns = {missing_columns!r}",
+                "df = df.with_columns([pl.col(column).is_null().alias(f'{column}__is_null') for column in missing_columns if column in df.columns])",
+            ]
+        )
+
+    return {
+        "checklist": checklist,
+        "high_priority_actions": high_priority[:20],
+        "polars_script": "\n".join(polars_lines) + "\n",
+        "notes": [
+            "O script é um ponto de partida e deve ser revisado antes de uso em produção.",
+            "Não impute valores automaticamente sem validar o significado do nulo.",
+            "IDs e chaves devem ser usados para relacionamento/deduplicação, não como feature direta por padrão.",
+        ],
+    }
+
+
 def build_smart_preview(df: pl.DataFrame, quality: dict[str, Any], row_limit: int = 8) -> dict[str, Any]:
     issue_examples: list[dict[str, Any]] = []
 

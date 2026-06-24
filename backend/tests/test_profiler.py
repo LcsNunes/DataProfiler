@@ -25,4 +25,6 @@ def test_run_profile_generates_core_sections():
     assert report["executive_summary"]["verdict"]
     assert report["readiness"]["data_quality_score"] >= 0
     assert report["column_actions"]
+    assert report["cleaning_plan"]["checklist"]
+    assert "import polars as pl" in report["cleaning_plan"]["polars_script"]
     assert "sample_rows" in report["smart_preview"]

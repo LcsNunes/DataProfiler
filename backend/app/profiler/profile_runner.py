@@ -7,6 +7,7 @@ from backend.app.core.security import sanitize_for_output
 from backend.app.loaders.base import DataLoadResult
 from backend.app.profiler.actionable_insights import (
     analysis_context,
+    build_cleaning_plan,
     build_column_actions,
     build_executive_summary,
     build_readiness_scores,
@@ -79,6 +80,7 @@ def build_profile_payload(loaded: DataLoadResult, business_objective: str | None
     )
     readiness = build_readiness_scores(summary, schema, quality, target)
     column_actions = build_column_actions(schema, quality, target)
+    cleaning_plan = build_cleaning_plan(column_actions)
     smart_preview = build_smart_preview(loaded.dataframe, quality)
     executive_summary = build_executive_summary(
         summary=summary,
@@ -99,6 +101,7 @@ def build_profile_payload(loaded: DataLoadResult, business_objective: str | None
         "executive_summary": executive_summary,
         "readiness": readiness,
         "column_actions": column_actions,
+        "cleaning_plan": cleaning_plan,
         "smart_preview": smart_preview,
         "summary": summary,
         "schema": schema,

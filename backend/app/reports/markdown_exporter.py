@@ -14,6 +14,7 @@ def export_markdown(report: dict[str, Any]) -> str:
     executive = report.get("executive_summary", {})
     readiness = report.get("readiness", {})
     column_actions = report.get("column_actions", [])[:12]
+    cleaning_plan = report.get("cleaning_plan", {})
     problems = report.get("problems", [])[:20]
     datasets = report.get("datasets", [])
     relationships = report.get("relationships", {})
@@ -70,6 +71,10 @@ def export_markdown(report: dict[str, Any]) -> str:
             f"- `{item.get('column')}`: {item.get('recommended_action')} - {' '.join(item.get('strategies', [])[:1])}"
             for item in column_actions
         ],
+        "",
+        "## Cleaning Plan",
+        "",
+        *[f"- [ ] {item}" for item in cleaning_plan.get("checklist", [])],
     ]
     if datasets:
         lines.extend(
@@ -90,7 +95,24 @@ def export_markdown(report: dict[str, Any]) -> str:
                 ],
             ]
         )
+    cleaning_md_path = report_path.with_name("cleaning_plan.md")
+    cleaning_py_path = report_path.with_name("cleaning_plan.py")
+    cleaning_lines = [
+        f"# Cleaning Plan `{report['id']}`",
+        "",
+        "## Checklist",
+        "",
+        *[f"- [ ] {item}" for item in cleaning_plan.get("checklist", [])],
+        "",
+        "## Notes",
+        "",
+        *[f"- {item}" for item in cleaning_plan.get("notes", [])],
+    ]
+    cleaning_md_path.write_text("\n".join(cleaning_lines), encoding="utf-8")
+    cleaning_py_path.write_text(cleaning_plan.get("polars_script", "# Cleaning plan unavailable.\n"), encoding="utf-8")
     md_path.write_text("\n".join(lines), encoding="utf-8")
     report["markdown_path"] = str(md_path)
+    report["cleaning_plan_path"] = str(cleaning_md_path)
+    report["cleaning_script_path"] = str(cleaning_py_path)
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return str(md_path)
