@@ -1,4 +1,5 @@
 import type { ColumnProfile } from "@/types/profile";
+import { formatTechnicalLabel } from "@/lib/labels";
 
 export function ColumnProfileTable({ columns }: { columns: ColumnProfile[] }) {
   return (
@@ -21,7 +22,7 @@ export function ColumnProfileTable({ columns }: { columns: ColumnProfile[] }) {
               <tr key={column.name}>
                 <td>{column.name}</td>
                 <td>
-                  <span className="pill">{column.semantic_type}</span>
+                  <span className="pill">{formatTechnicalLabel(column.semantic_type)}</span>
                   <span className="pill">{column.dtype}</span>
                   {column.possible_sensitive && <span className="pill">sensível?</span>}
                 </td>
@@ -29,7 +30,11 @@ export function ColumnProfileTable({ columns }: { columns: ColumnProfile[] }) {
                 <td>
                   {column.unique_count} ({Math.round(column.unique_rate * 100)}%)
                 </td>
-                <td>{column.problems.length ? column.problems.map((item) => <span className="pill" key={item}>{item}</span>) : "-"}</td>
+                <td>
+                  {column.problems.length
+                    ? column.problems.map((item) => <span className="pill" key={item}>{formatTechnicalLabel(item)}</span>)
+                    : "-"}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -38,4 +43,3 @@ export function ColumnProfileTable({ columns }: { columns: ColumnProfile[] }) {
     </section>
   );
 }
-

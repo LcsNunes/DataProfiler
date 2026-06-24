@@ -14,6 +14,7 @@ import { RecommendationPanel } from "@/components/RecommendationPanel";
 import { SmartPreviewPanel } from "@/components/SmartPreviewPanel";
 import { TableMapPanel } from "@/components/TableMapPanel";
 import { getReport } from "@/lib/api";
+import { formatSourceType } from "@/lib/labels";
 import type { ProfileReport } from "@/types/profile";
 
 export default function ProfilePage() {
@@ -31,7 +32,7 @@ export default function ProfilePage() {
         if (active) setReport(loadedReport);
       })
       .catch((err) => {
-        if (active) setError(err instanceof Error ? err.message : "Falha ao carregar relatorio.");
+        if (active) setError(err instanceof Error ? err.message : "Falha ao carregar relatório.");
       });
 
     return () => {
@@ -43,14 +44,14 @@ export default function ProfilePage() {
     <main className="shell">
       <AppNav />
       {error && <div className="error">{error}</div>}
-      {!report && !error && <div className="card">Carregando relatorio...</div>}
+      {!report && !error && <div className="card">Carregando relatório...</div>}
       {report && (
         <div className="dashboard">
           <section className="card">
-            <span className="eyebrow">relatorio {report.id}</span>
-            <h2>Resultado da analise</h2>
+            <span className="eyebrow">relatório {report.id}</span>
+            <h2>Resultado da análise</h2>
             <p className="muted">
-              Origem: {String(report.source.type ?? "desconhecida")} - criado em {new Date(report.created_at).toLocaleString("pt-BR")}
+              Origem: {formatSourceType(report.source.type)} · criado em {new Date(report.created_at).toLocaleString("pt-BR")}
             </p>
           </section>
           <ExecutiveSummaryPanel report={report} />

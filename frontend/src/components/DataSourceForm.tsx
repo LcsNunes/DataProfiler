@@ -49,7 +49,7 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
       </div>
 
       <div className="field objective-field">
-        <label>Objetivo da analise (opcional)</label>
+        <label>Objetivo da análise (opcional)</label>
         <textarea
           value={businessObjective}
           onChange={(event) => setBusinessObjective(event.target.value)}

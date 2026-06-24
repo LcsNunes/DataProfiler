@@ -1,4 +1,5 @@
 import type { ColumnAction } from "@/types/profile";
+import { formatInsightText, formatTechnicalLabel } from "@/lib/labels";
 
 export function ActionPlanPanel({ actions }: { actions?: ColumnAction[] }) {
   if (!actions?.length) return null;
@@ -6,8 +7,8 @@ export function ActionPlanPanel({ actions }: { actions?: ColumnAction[] }) {
 
   return (
     <section className="card">
-      <span className="eyebrow">plano acionavel</span>
-      <h3>Acoes recomendadas por coluna</h3>
+      <span className="eyebrow">plano acionável</span>
+      <h3>Ações recomendadas por coluna</h3>
       <p className="muted">Uma lista objetiva para decidir o que validar, limpar, remover ou usar como chave.</p>
       <div className="table-wrap">
         <table>
@@ -24,17 +25,17 @@ export function ActionPlanPanel({ actions }: { actions?: ColumnAction[] }) {
             {visible.map((action) => (
               <tr key={`${action.column}-${action.recommended_action}`}>
                 <td>{action.column}</td>
-                <td><span className="pill">{action.recommended_action}</span></td>
-                <td>{action.role}</td>
-                <td>{action.reasons.join(" ")}</td>
-                <td>{action.strategies.join(" ")}</td>
+                <td><span className="pill">{formatTechnicalLabel(action.recommended_action)}</span></td>
+                <td>{formatTechnicalLabel(action.role)}</td>
+                <td>{formatInsightText(action.reasons.join(" "))}</td>
+                <td>{formatInsightText(action.strategies.join(" "))}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       {actions.length > visible.length && (
-        <p className="muted">Mostrando {visible.length} de {actions.length} acoes. Prioridades altas aparecem primeiro.</p>
+        <p className="muted">Mostrando {visible.length} de {actions.length} ações. Prioridades altas aparecem primeiro.</p>
       )}
     </section>
   );

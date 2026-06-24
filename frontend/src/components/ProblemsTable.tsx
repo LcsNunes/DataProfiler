@@ -1,4 +1,5 @@
 import type { IssueExplanation, Problem } from "@/types/profile";
+import { formatInsightText, formatTechnicalLabel } from "@/lib/labels";
 
 function uniqueExplanations(problems: Problem[]) {
   const seen = new Set<string>();
@@ -19,24 +20,24 @@ export function ProblemsTable({ problems }: { problems: Problem[] }) {
     <>
       <section className="card">
         <h3>Legenda dos alertas</h3>
-        <p className="muted">O que cada problema significa, cuidados e estrategias possiveis.</p>
+        <p className="muted">O que cada problema significa, cuidados e estratégias possíveis.</p>
         <div className="issue-legend">
           {explanations.map((item) => (
             <article className="issue-card" key={item.type}>
-              <span className="pill">{item.type}</span>
+              <span className="pill">{formatTechnicalLabel(item.type)}</span>
               <h3>{item.title}</h3>
-              <p>{item.meaning}</p>
-              <p className="muted">{item.why_it_matters}</p>
+              <p>{formatInsightText(item.meaning)}</p>
+              <p className="muted">{formatInsightText(item.why_it_matters)}</p>
               <strong>Cuidados</strong>
               <ul>
                 {item.cautions.map((caution) => (
-                  <li key={caution}>{caution}</li>
+                  <li key={caution}>{formatInsightText(caution)}</li>
                 ))}
               </ul>
-              <strong>Estrategias</strong>
+              <strong>Estratégias</strong>
               <ul>
                 {item.strategies.map((strategy) => (
-                  <li key={strategy}>{strategy}</li>
+                  <li key={strategy}>{formatInsightText(strategy)}</li>
                 ))}
               </ul>
             </article>
@@ -64,8 +65,8 @@ export function ProblemsTable({ problems }: { problems: Problem[] }) {
               {visibleProblems.map((problem, index) => (
                 <tr key={`${problem.column}-${problem.type}-${index}`}>
                   <td>{problem.column}</td>
-                  <td>{problem.explanation?.title ?? problem.type}</td>
-                  <td>{problem.severity}</td>
+                  <td>{problem.explanation?.title ?? formatTechnicalLabel(problem.type)}</td>
+                  <td>{formatTechnicalLabel(problem.severity)}</td>
                   <td>{JSON.stringify(problem.details)}</td>
                 </tr>
               ))}

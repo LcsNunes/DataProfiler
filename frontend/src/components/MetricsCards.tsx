@@ -1,4 +1,5 @@
 import type { ProfileReport } from "@/types/profile";
+import { formatInsightText } from "@/lib/labels";
 
 function format(value: unknown) {
   if (typeof value === "number") return value.toLocaleString("pt-BR");
@@ -21,7 +22,7 @@ export function MetricsCards({ report }: { report: ProfileReport }) {
         ["Colunas", summary.column_count],
         ["Nulos", `${format(summary.null_cells)} (${format(summary.null_pct)}%)`],
         ["Duplicados", summary.duplicate_rows],
-        ["Target provavel", target.column ?? "nao detectado"]
+        ["Target provável", target.column ?? "não detectado"]
       ];
 
   return (
@@ -29,7 +30,7 @@ export function MetricsCards({ report }: { report: ProfileReport }) {
       {cards.map(([label, value]) => (
         <div key={label} className="metric-card">
           <span>{label}</span>
-          <strong>{format(value)}</strong>
+          <strong>{formatInsightText(format(value))}</strong>
         </div>
       ))}
     </section>

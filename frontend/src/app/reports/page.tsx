@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { listReports } from "@/lib/api";
+import { formatConfidenceLabel, formatSourceType } from "@/lib/labels";
 import type { ReportSummary } from "@/types/profile";
 
 export default function ReportsPage() {
@@ -31,10 +32,10 @@ export default function ReportsPage() {
             <div>
               <strong>{report.id}</strong>
               <p className="muted">
-                {String(report.source.type ?? "origem")} · {new Date(report.created_at).toLocaleString("pt-BR")}
+                {formatSourceType(report.source.type)} · {new Date(report.created_at).toLocaleString("pt-BR")}
               </p>
             </div>
-            <span className="pill">{report.recommendation?.confidence ?? "n/a"}</span>
+            <span className="pill">{formatConfidenceLabel(report.recommendation?.confidence ?? "n/a")}</span>
           </Link>
         ))}
         {!reports.length && !error && <div className="card">Nenhum relatório encontrado.</div>}
@@ -42,4 +43,3 @@ export default function ReportsPage() {
     </main>
   );
 }
-

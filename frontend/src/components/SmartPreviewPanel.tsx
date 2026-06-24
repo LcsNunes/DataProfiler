@@ -1,4 +1,5 @@
 import type { SmartPreview } from "@/types/profile";
+import { formatTechnicalLabel } from "@/lib/labels";
 
 export function SmartPreviewPanel({ preview }: { preview?: SmartPreview }) {
   if (!preview) return null;
@@ -7,7 +8,7 @@ export function SmartPreviewPanel({ preview }: { preview?: SmartPreview }) {
   return (
     <section className="card">
       <span className="eyebrow">preview inteligente</span>
-      <h3>Amostras para investigar rapido</h3>
+      <h3>Amostras para investigar rápido</h3>
       <p className="muted">Linhas iniciais e exemplos de problemas encontrados pelo backend.</p>
 
       {!!columns.length && (
@@ -32,7 +33,7 @@ export function SmartPreviewPanel({ preview }: { preview?: SmartPreview }) {
       <div className="issue-example-grid">
         {preview.issue_examples.slice(0, 8).map((item) => (
           <article className="issue-card" key={`${item.column}-${item.type}`}>
-            <span className="pill">{item.type}</span>
+            <span className="pill">{formatTechnicalLabel(item.type)}</span>
             <h3>{item.column}</h3>
             <pre>{JSON.stringify(item.examples, null, 2)}</pre>
           </article>

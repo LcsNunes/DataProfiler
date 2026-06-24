@@ -1,4 +1,5 @@
 import type { TableMap } from "@/types/profile";
+import { formatTechnicalLabel } from "@/lib/labels";
 
 export function TableMapPanel({ tableMap }: { tableMap?: TableMap }) {
   if (!tableMap?.nodes?.length) return null;
@@ -36,7 +37,7 @@ export function TableMapPanel({ tableMap }: { tableMap?: TableMap }) {
               <tr key={`${edge.source}-${edge.target}`}>
                 <td>{edge.source}</td>
                 <td>{edge.target}</td>
-                <td>{edge.relationship_hint}</td>
+                <td>{formatTechnicalLabel(edge.relationship_hint)}</td>
                 <td>{edge.overlap_pct}%</td>
                 <td>{edge.shared_columns.join(", ")}</td>
               </tr>

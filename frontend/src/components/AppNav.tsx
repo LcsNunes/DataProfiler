@@ -10,9 +10,8 @@ export function AppNav() {
       <div className="nav-links">
         <Link href="/">Nova análise</Link>
         <Link href="/reports">Histórico</Link>
-        <Link href="/settings">Config</Link>
+        <Link href="/settings">Configurações</Link>
       </div>
     </nav>
   );
 }
-
