@@ -329,6 +329,40 @@ h3 {
   background: var(--sage);
 }
 
+.analysis-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.analysis-preset-card {
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px;
+  text-align: left;
+  color: var(--ink);
+  background: rgba(255, 250, 239, 0.68);
+}
+
+.analysis-preset-card strong {
+  font-size: 13px;
+}
+
+.analysis-preset-card span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.analysis-preset-card.active,
+.analysis-preset-card:hover {
+  border-color: rgba(61, 107, 100, 0.5);
+  background: rgba(226, 240, 228, 0.72);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -982,7 +1016,8 @@ th {
 
   .tabs,
   .metrics,
-  .signal-strip {
+  .signal-strip,
+  .analysis-preset-grid {
     grid-template-columns: 1fr;
   }
 

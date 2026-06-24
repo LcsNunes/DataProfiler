@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ApiSourceForm } from "@/components/ApiSourceForm";
 import { FilePathForm } from "@/components/FilePathForm";
 import { SqlSourceForm } from "@/components/SqlSourceForm";
+import { ANALYSIS_PRESETS } from "@/lib/analysisPresets";
 import { profileUpload, profileUploadMultiple } from "@/lib/api";
 import type { ProfileReport } from "@/types/profile";
 
@@ -22,6 +23,7 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
   const [tab, setTab] = useState<Tab>("upload");
   const [files, setFiles] = useState<File[]>([]);
   const [businessObjective, setBusinessObjective] = useState("");
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +42,11 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
     } finally {
       setLoading(false);
     }
+  }
+
+  function applyPreset(presetId: string, objective: string) {
+    setSelectedPreset(presetId);
+    setBusinessObjective(objective);
   }
 
   return (
@@ -72,16 +79,35 @@ export function DataSourceForm({ onReport }: { onReport: (report: ProfileReport)
               className={`preset-chip ${businessObjective === preset ? "active" : ""}`}
               key={preset}
               type="button"
-              onClick={() => setBusinessObjective(preset)}
+              onClick={() => {
+                setSelectedPreset(null);
+                setBusinessObjective(preset);
+              }}
             >
               {preset}
+            </button>
+          ))}
+        </div>
+        <div className="analysis-preset-grid">
+          {ANALYSIS_PRESETS.map((preset) => (
+            <button
+              className={`analysis-preset-card ${selectedPreset === preset.id ? "active" : ""}`}
+              key={preset.id}
+              type="button"
+              onClick={() => applyPreset(preset.id, preset.objective)}
+            >
+              <strong>{preset.title}</strong>
+              <span>{preset.description}</span>
             </button>
           ))}
         </div>
         <textarea
           aria-label="Objetivo da análise"
           value={businessObjective}
-          onChange={(event) => setBusinessObjective(event.target.value)}
+          onChange={(event) => {
+            setSelectedPreset(null);
+            setBusinessObjective(event.target.value);
+          }}
           placeholder="Ex: entender churn, validar qualidade, responder perguntas em linguagem natural, detectar fraude"
         />
         <small className="muted">Opcional. Se ficar vazio, a análise segue apenas pelos sinais detectados na base.</small>
